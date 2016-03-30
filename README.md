@@ -1,2 +1,2 @@
 # aa222
-Introduction to Multi Disciplinary Optimization 
+Introduction to Multidisciplinary Design Optimization 
