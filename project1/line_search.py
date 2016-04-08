@@ -1,6 +1,6 @@
 import numpy as np
 
-def backtrack(x0,f,m,p,f0,alp=1,tau=0.5,c=0.5,em=100):
+def backtrack(x0,f,m,p,f0,alp=1.5,tau=0.5,c=0.5,em=100):
     """Backtracking line search
     Usage
     (alp,f1,cnt) = backtrack(x0,f,m,p,f0)
