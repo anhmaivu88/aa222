@@ -35,16 +35,37 @@ def backtrack(x0,f,m,p,f0,alp=1,tau=0.5,c=0.5,em=100):
     # Return
     return (alp,f1,cnt)
 
+# Symmetric search
+# def quad_fit(x0,f,p,f0,d=0.5):
+#     """Quadratic fit line search
+#     """
+#     # Query forward and back
+#     x1 = x0 - d*p; f1 = f(x1)
+#     x2 = x0 + d*p; f2 = f(x2)
+#     # Helper quantities
+#     a0 = 0; a1 = -d; a2 = d;
+#     A = (a0-a1)*(a0-a2); B = (a1-a0)*(a1-a2); C = (a2-a0)*(a2-a1)
+#     # Solve the fit quadratic
+#     alp = 0.5*( f0*(a1+a2)/A + f1*(a0+a2)/B + f2*(a0+a1)/C ) /\
+#             ( f0/A + f1/B + f2/C )
+#     return (alp, f(x0+alp*p), 3)
+
+# Forward search
 def quad_fit(x0,f,p,f0,d=0.5):
     """Quadratic fit line search
     """
     # Query forward and back
-    x1 = x0 - d*p; f1 = f(x1)
-    x2 = x0 + d*p; f2 = f(x2)
+    x1 = x0 + d*p;   f1 = f(x1)
+    x2 = x0 + 2*d*p; f2 = f(x2)
     # Helper quantities
-    a0 = 0; a1 = -d; a2 = d;
+    a0 = 0; a1 = +d; a2 = 2*d;
     A = (a0-a1)*(a0-a2); B = (a1-a0)*(a1-a2); C = (a2-a0)*(a2-a1)
     # Solve the fit quadratic
     alp = 0.5*( f0*(a1+a2)/A + f1*(a0+a2)/B + f2*(a0+a1)/C ) /\
             ( f0/A + f1/B + f2/C )
-    return (alp, f(x0+alp*p), 3)
+    # Return the min of all values found
+    fn = f(x0+alp*p)
+    ind= np.argmin([f1,f2,fn])
+    f_o= [f1,f2,fn][ind]
+    alp_o = [a1,a2,alp][ind]
+    return (alp_o, f_o, 3)

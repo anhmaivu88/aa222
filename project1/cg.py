@@ -4,7 +4,6 @@ from numpy.linalg import norm
 import matplotlib.pyplot as plt
 from scipy.optimize import fmin_cg
 # Custom libraries
-
 from grad import grad
 from line_search import backtrack, quad_fit
 
@@ -12,30 +11,34 @@ from line_search import backtrack, quad_fit
 def cg(f,x0,evalMax,eps=1e-3,lin=0,nIter=100,h=1e-2):
     """Conjugate Gradient solver
     Usage
-    (xs,fs,ct) = cg(f,x0,evalMax)
+    (x0, f0, ct, X, it) = cg(f,x0,evalMax)
+
     Arguments
     f       = function to minimize
     x0      = initial guess
     evalMax = maximum function evaluations
+
     Keyword arguments
     eps     = convergence criterion
-    lin     = linsearch type (0=backtracking,)
+    lin     = linsearch type (0=backtracking,1=quad fit)
+
     Returns
     xs      = minimal point
     fs      = minimal value
     ct      = number of function evaluations
     X       = sequence of points
+    it      = number of iterations used
     """
     if (lin!=0) and (lin!=1):
-        raise ValueError("Unsupported linsearch")
+        raise ValueError("Unrecognized linsearch")
     # Setup
-    ct  = 0
-    it  = 0
-    x0  = np.array(x0)
-    X   = np.array([x0])
-    n   = np.size(x0)
+    ct  = 0              # Function calls
+    it  = 0              # Iteration count
+    x0  = np.array(x0)   # initial guess
+    X   = np.array([x0]) # point history
+    n   = np.size(x0)    # dim of problem
     f0  = f(x0);                ct += 1
-    err = eps * 2
+    err = eps * 2        # initial error
     ### Initial direction: steepest descent
     dF0 = grad(x0,fcn,f0);      ct += n
     d0  = -dF0
@@ -53,6 +56,7 @@ def cg(f,x0,evalMax,eps=1e-3,lin=0,nIter=100,h=1e-2):
             ct += k
         x0 = x0 + alp*p
         X = np.append(X,[x0],axis=0)
+        
         # Compute conjugate direction
         if (ct+n<evalMax):
             dF1 = grad(x0,fcn,f0); ct += n
