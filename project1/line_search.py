@@ -45,6 +45,6 @@ def quad_fit(x0,f,p,f0,d=0.5):
     a0 = 0; a1 = -d; a2 = d;
     A = (a0-a1)*(a0-a2); B = (a1-a0)*(a1-a2); C = (a2-a0)*(a2-a1)
     # Solve the fit quadratic
-    alp = 0.5*( (a1+a2)/A + (a0+a2)/B + (a0+a1)/C ) /\
+    alp = 0.5*( f0*(a1+a2)/A + f1*(a0+a2)/B + f2*(a0+a1)/C ) /\
             ( f0/A + f1/B + f2/C )
     return (alp, f(x0+alp*p), 3)

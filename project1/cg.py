@@ -3,7 +3,7 @@ from grad import grad
 from line_search import backtrack, quad_fit
 
 # TODO -- implement evalMax stopping criterion
-def cg(f,x0,evalMax,eps=1e-6,lin=0):
+def cg(f,x0,evalMax,eps=1e-6,lin=0,nIter=100):
     """Conjugate Gradient solver
     Usage
     (xs,fs,ct) = cg(f,x0,evalMax)
@@ -23,12 +23,14 @@ def cg(f,x0,evalMax,eps=1e-6,lin=0):
         raise ValueError("Unsupported linsearch")
     # Setup
     ct  = 0
+    it  = 0
     x0  = np.array(x0)
     n   = np.size(x0)
     f0  = f(x0);                ct += 1
     err = eps * 2
     # Main solver loop
-    while (err>eps) and (ct < evalMax):
+    while (err>eps) and (ct < evalMax) and \
+            (it<nIter):
         # Initial step: Steepest Descent
         if (ct+n<evalMax):
             dF0 = grad(x0,fcn,f0);      ct += n
@@ -73,13 +75,16 @@ def cg(f,x0,evalMax,eps=1e-6,lin=0):
             # Complete the step
             err = np.linalg.norm(dF0)
             j += 1
+        # Count full iterations
+        it += 1
     # Complete CG solve
     return x1, f1, ct
 
 if __name__ == "__main__":
-    from rosenbrock import fcn
-    x0 = [0,0]
+    # from rosenbrock import fcn
+    from simple_quad import fcn
+    x0 = [1,0.5]
     print "f(x0)=%f" % fcn(x0)
-    x0,fs,ct = cg(fcn,x0,2e4)
+    x0,fs,ct = cg(fcn,x0,2e4,lin=1,nIter=2)
     print "f(xs)=%f" % fs
     print "niter=%d" % ct
