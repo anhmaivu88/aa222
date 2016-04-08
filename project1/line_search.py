@@ -41,6 +41,10 @@ def quad_fit(x0,f,p,f0,d=0.5):
     # Query forward and back
     x1 = x0 - d*p; f1 = f(x1)
     x2 = x0 + d*p; f2 = f(x2)
+    # Helper quantities
+    a0 = 0; a1 = -d; a2 = d;
+    A = (a0-a1)*(a0-a2); B = (a1-a0)*(a1-a2); C = (a2-a0)*(a2-a1)
     # Solve the fit quadratic
-    alp = (f1-f2)*d / (2*f1+2*f2-4*f0)
+    alp = 0.5*( (a1+a2)/A + (a0+a2)/B + (a0+a1)/C ) /\
+            ( f0/A + f1/B + f2/C )
     return (alp, f(x0+alp*p), 3)
