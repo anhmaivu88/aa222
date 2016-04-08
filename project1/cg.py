@@ -1,5 +1,6 @@
 # Standard libraries
 import numpy as np
+from numpy.linalg import norm
 import matplotlib.pyplot as plt
 # Custom libraries
 
@@ -7,7 +8,7 @@ from grad import grad
 from line_search import backtrack, quad_fit
 
 # TODO -- implement evalMax stopping criterion
-def cg(f,x0,evalMax,eps=1e-6,lin=0,nIter=100):
+def cg(f,x0,evalMax,eps=1e-6,lin=0,nIter=100,h=1e-2):
     """Conjugate Gradient solver
     Usage
     (xs,fs,ct) = cg(f,x0,evalMax)
@@ -34,79 +35,67 @@ def cg(f,x0,evalMax,eps=1e-6,lin=0,nIter=100):
     n   = np.size(x0)
     f0  = f(x0);                ct += 1
     err = eps * 2
-    # Main solver loop
-    while (err>eps) and (ct < evalMax) and \
-            (it<nIter):
-        # Initial step: Steepest Descent
+    ### Initial step: steepest descent
+    dF0 = grad(x0,fcn,f0,h=h);      ct += n
+    d0 = -dF0
+    # Perform line search
+    p  = d0 / norm(d0)
+    if (lin==0):
+        m   = np.dot(dF0,p)
+        alp, f1, k = backtrack(x0,fcn,m,p,f0,em=evalMax-ct)
+        ct += k
+    elif (lin==1):
+        alp, f1, k = quad_fit(x0,fcn,p,f0)
+    x0 = x0 + alp*p
+    f0 = fcn(x0)
+    X = np.append(X,[x0],axis=0)
+    it += 1
+
+    ### Main loop
+    while (err>eps) and (ct<evalMax) and (it<nIter):
+        # Compute conjugate direction
         if (ct+n<evalMax):
-            dF0 = grad(x0,fcn,f0);      ct += n
+            dF1 = grad(x0,fcn,f0,h=h); ct += n
+            print(dF1)
         else:
-            return x0, f0, ct
-        d0 = -dF0
+            return x0, f0, ct, X, it
+        beta = max(np.dot(dF1,dF1-dF0)/np.dot(dF0,dF0),0)
+        # beta = 0
+        d1 = -dF1 + beta*dF0
         # Perform line search
-        p = d0 / np.linalg.norm(d0)
+        p  = d1 / norm(d1)
         if (lin==0):
-            m  = np.dot(p,dF0)
-            alp, f1, k = backtrack(x0,fcn,m,p,f0,\
-                                   em=evalMax-ct);
+            m = np.dot(dF1,p)
+            alp, f1, k = backtrack(x0,fcn,m,p,f0,em=evalMax-ct)
+            ct += k
         elif (lin==1):
             alp, f1, k = quad_fit(x0,fcn,p,f0)
-        ct += k
-        x1 = x0 + alp*p
-        X = np.append(X,[x1],axis=0)
-        # n-1 Conjugate Gradient steps
-        j = 1
-        while (j < n) and (err>eps) and \
-                (ct < evalMax):
-            # Calculate new gradient
-            if (ct+n<evalMax):
-                dF1 = grad(x1,fcn,f1);  ct += n
-            else:
-                return x1, f1, ct
-            # Conjugate direction
-            # beta = 0
-            # Polack-Rebiere
-            beta = np.dot(dF1,dF1-dF0)/np.dot(dF0,dF0)
-            print(beta)
-            # Fletcher-Reeves
-            # beta = np.linalg.norm(dF1)**2/\
-            #        np.linalg.norm(dF0)**2
-            d1 = -dF1 + beta*d0
-            # Line search
-            p = d1 / np.linalg.norm(d1)
-            if (lin==0):
-                m = np.dot(p,dF1)
-                alp, f1, k = backtrack(x1,fcn,m,p,f1,\
-                                       em=evalMax-ct);
-            elif (lin==1):
-                alp, f1, k = quad_fit(x1,fcn,p,f1)
             ct += k
-            x1 = x0 + alp*p
-            # Store previous values
-            d0  = d1
-            dF0 = dF1
-            x0  = x1
-            # Complete the step
-            err = np.linalg.norm(dF0)
-            j += 1
-            X = np.append(X,[x0],axis=0)
-        # Count full iterations
+        x0 = x0 + alp*p
+        X = np.append(X,[x0],axis=0)
+        # Swap old directions
+        d0  = d1
+        dF0 = dF1
+        # Iterate counter
         it += 1
+
     # Complete CG solve
-    return x1, f1, ct, X
+    return x0, f0, ct, X, it
 
 if __name__ == "__main__":
     ### Setup
     # from rosenbrock import fcn
-    from simple_quad import fcn
+    from simple_quad import fcn; xstar = [0,0]
     # Set initial guess
     x0 = [1,0.5]
     print "f(x0)=%f" % fcn(x0)
 
     ### Solver call
-    xs,fs,ct,Xs = cg(fcn,x0,2e4,lin=1,nIter=2)
+    xs,fs,ct,Xs,it = cg(fcn,x0,2e4,lin=1,nIter=10)
+    print(xs)
     print "f(xs)=%f" % fs
     print "calls=%d" % ct
+    print "iter=%d" % it
 
     ### Plotting
     # Define meshgrid
@@ -132,6 +121,7 @@ if __name__ == "__main__":
     manual_locations = [(-1, -1.4), (-0.62, -0.7), (-2, 0.5), (1.7, 1.2), (2.0, 1.4), (2.4, 1.7)]
     plt.clabel(CS, inline=1, fontsize=10, manual=manual_locations)
     plt.title('Sequence of iterates')
+    plt.plot(xstar[0],xstar[1],'o')
 
     # Overlay point sequence
     for i in range(np.shape(Xs)[0]-1):

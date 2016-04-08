@@ -24,13 +24,13 @@ def grad(x,f,f0=None,h=1e-8):
 
 if __name__ == "__main__":
     ### Setup
-    from rosenbrock import fcn
-    # from simple_quad import fcn
+    # from rosenbrock import fcn
+    from simple_quad import fcn
 
     ### Test gradient
     x0 = [1, 1]; f0 = fcn(x0); g0 = grad(x0,fcn,f0); e0=x0-g0*0.1
-    x1 = [0, 1]; f1 = fcn(x1); g1 = grad(x1,fcn,f1); e1=x1-g1*0.1
-    x2 = [0,-1]; f2 = fcn(x2); g2 = grad(x2,fcn,f2); e2=x2-g2*0.1
+    x1 = [0.1,0.1]; f1 = fcn(x1); g1 = grad(x1,fcn,f1); e1=x1-g1*0.1
+    x2 = [0.01,0.01]; f2 = fcn(x2); g2 = grad(x2,fcn,f2); e2=x2-g2*0.1
 
     ### Plotting
     # Define meshgrid
