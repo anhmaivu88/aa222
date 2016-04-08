@@ -1,7 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from numpy.linalg import norm
+from scipy import sqrt
 
-def grad(x,f,f0=None,h=1e-8):
+_epsilon = sqrt(np.finfo(float).eps)
+
+def grad(x,f,f0=None,h=_epsilon):
     # If necessary, calculate f(x)
     if f0:
         pass
@@ -25,18 +29,26 @@ def grad(x,f,f0=None,h=1e-8):
 if __name__ == "__main__":
     ### Setup
     # from rosenbrock import fcn
-    from simple_quad import fcn
+    from simple_quad import fcn, dF
 
     ### Test gradient
     x0 = [1, 1]; f0 = fcn(x0); g0 = grad(x0,fcn,f0); e0=x0-g0*0.1
     x1 = [0.1,0.1]; f1 = fcn(x1); g1 = grad(x1,fcn,f1); e1=x1-g1*0.1
     x2 = [0.01,0.01]; f2 = fcn(x2); g2 = grad(x2,fcn,f2); e2=x2-g2*0.1
+    # Compute error
+    err0 = norm(np.array(dF(x0))-g0)
+    err1 = norm(np.array(dF(x1))-g1)
+    err2 = norm(np.array(dF(x2))-g2)
+
+    print "err0=%f" % err0
+    print "err1=%f" % err1
+    print "err2=%f" % err2
 
     ### Plotting
     # Define meshgrid
     delta = 0.025
-    x = np.arange(-3.0, 3.0, delta)
-    y = np.arange(-2.0, 2.0, delta)
+    x = np.arange(-1.5, 1.5, delta)
+    y = np.arange(-0.0, 1.5, delta)
     X, Y = np.meshgrid(x, y)
     dim = np.shape(X)
     # Compute function values
@@ -53,8 +65,9 @@ if __name__ == "__main__":
 
     # Plot contour
     CS = plt.contour(X, Y, Z)
-    manual_locations = [(-1, -1.4), (-0.62, -0.7), (-2, 0.5), (1.7, 1.2), (2.0, 1.4), (2.4, 1.7)]
-    plt.clabel(CS, inline=1, fontsize=10, manual=manual_locations)
+    # manual_locations = [(-1, -1.4), (-0.62, -0.7), (-2, 0.5), (1.7, 1.2), (2.0, 1.4), (2.4, 1.7)]
+    # plt.clabel(CS, inline=1, fontsize=10, manual=manual_locations)
+    plt.clabel(CS, inline=1, fontsize=10)
     plt.title('Sequence of iterates')
 
     # Plot the gradient
