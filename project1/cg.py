@@ -36,25 +36,23 @@ def cg(f,x0,evalMax,eps=1e-3,lin=0,nIter=100,h=1e-2):
     n   = np.size(x0)
     f0  = f(x0);                ct += 1
     err = eps * 2
-    ### Initial step: steepest descent
+    ### Initial direction: steepest descent
     dF0 = grad(x0,fcn,f0);      ct += n
-    d0 = -dF0
-    # Perform line search
-    p  = d0 / norm(d0)
-    if (lin==0):
-        m   = np.dot(dF0,p)
-        alp, f1, k = backtrack(x0,fcn,m,p,f0,em=evalMax-ct)
-        ct += k
-    elif (lin==1):
-        alp, f1, k = quad_fit(x0,fcn,p,f0)
-        ct += k
-    x0 = x0 + alp*p
-    f0 = fcn(x0)
-    X = np.append(X,[x0],axis=0)
-    it += 1
+    d0  = -dF0
 
     ### Main loop
     while (err>eps) and (ct<evalMax) and (it<nIter):
+        # Perform line search
+        p  = d0 / norm(d0)
+        if (lin==0):
+            m = np.dot(dF0,p)
+            alp, f0, k = backtrack(x0,fcn,m,p,f0,em=evalMax-ct)
+            ct += k
+        elif (lin==1):
+            alp, f0, k = quad_fit(x0,fcn,p,f0)
+            ct += k
+        x0 = x0 + alp*p
+        X = np.append(X,[x0],axis=0)
         # Compute conjugate direction
         if (ct+n<evalMax):
             dF1 = grad(x0,fcn,f0); ct += n
@@ -62,21 +60,10 @@ def cg(f,x0,evalMax,eps=1e-3,lin=0,nIter=100,h=1e-2):
             return x0, f0, ct, X, it
         beta = max(np.dot(dF1,dF1-dF0)/np.dot(dF0,dF0),0)
         d1 = -dF1 + beta*d0
-        # Perform line search
-        p  = d1 / norm(d1)
-        if (lin==0):
-            m = np.dot(dF1,p)
-            alp, f1, k = backtrack(x0,fcn,m,p,f0,em=evalMax-ct)
-            ct += k
-        elif (lin==1):
-            alp, f1, k = quad_fit(x0,fcn,p,f0)
-            ct += k
-        x0 = x0 + alp*p
-        X = np.append(X,[x0],axis=0)
         # Swap old directions
         d0  = d1
         dF0 = dF1
-        # Compute error == norm(grad)
+        # Compute error (norm of grad)
         err = norm(dF0)
         # Iterate counter
         it += 1
@@ -86,58 +73,76 @@ def cg(f,x0,evalMax,eps=1e-3,lin=0,nIter=100,h=1e-2):
 
 if __name__ == "__main__":
     ### Setup
-    # from rosenbrock import fcn; xstar = [1,1]
-    from simple_quad import fcn; xstar = [0,0]
-    # Set initial guess
-    x0 = [1,1.5]
-    print "f(x0)=%f" % fcn(x0)
+    # Choose objective function
+    ## Rosenbrock function
+    from rosenbrock import fcn 
+    xstar = [1,1]; x0 = [1,1.5]
+    ## Simple quadratic function
+    # from simple_quad import fcn
+    # xstar = [0,0]; x0 = [1,1.5]
+    ## Wood function
+    # from wood import fcn
+    # xstar = [1,1,1,1]; x0 = [0,0,0,0]
+    ## Powell function
+    # from powell import fcn
+    # xstar = [0,0,0,0]; x0 = [1,1,1,1]
+
+    # Set parameters
+    nIter = 100
+    nCall = 1e4
+    comsci = True       # compare vs SciPy
+    plotting = False    # plot the result
 
     ### Solver call
-    xs,fs,ct,Xs,it = cg(fcn,x0,2e4,lin=1,nIter=20)
-    print(xs)
+    xs,fs,ct,Xs,it = cg(fcn,x0,nCall,\
+                        lin=0,nIter=nIter)
+    
     print "f(xs)=%f" % fs
     print "calls=%d" % ct
     print "iter=%d" % it
 
-    ### SciPy's solver
-    res = fmin_cg(fcn,x0,retall=True)
+    # Scipy call
+    if comsci==True:
+        res = fmin_cg(fcn,x0,retall=True)
 
     ### Plotting
-    # Define meshgrid
-    delta = 0.025
-    x = np.arange(min(x0[0],xstar[0])-0.5, \
-                  max(x0[0],xstar[0])+0.5, delta)
-    y = np.arange(min(x0[1],xstar[1])-0.5, \
-                  max(x0[1],xstar[1])+0.5, delta)
-    X, Y = np.meshgrid(x, y)
-    dim = np.shape(X)
-    # Compute function values
-    Xv = X.flatten(); Yv=Y.flatten()
-    Input = zip(Xv,Yv)
-    Zv = []
-    for x in Input:
-        Zv.append(fcn(x))
-    # Restore arrays to proper dimensions
-    Z = np.array(Zv).reshape(dim)
-    
-    # Open figure
-    plt.figure()
+    if plotting == True:
+        # Define meshgrid
+        delta = 0.025
+        x = np.arange(min(x0[0],xstar[0])-0.5, \
+                      max(x0[0],xstar[0])+0.5, delta)
+        y = np.arange(min(x0[1],xstar[1])-0.5, \
+                      max(x0[1],xstar[1])+0.5, delta)
+        X, Y = np.meshgrid(x, y)
+        dim = np.shape(X)
+        # Compute function values
+        Xv = X.flatten(); Yv=Y.flatten()
+        Input = zip(Xv,Yv)
+        Zv = []
+        for x in Input:
+            Zv.append(fcn(x))
+        # Restore arrays to proper dimensions
+        Z = np.array(Zv).reshape(dim)
+        
+        # Open figure
+        plt.figure()
 
-    # Plot contour
-    CS = plt.contour(X, Y, Z)
-    # manual_locations = [(-1, -1.4), (-0.62, -0.7), (-2, 0.5), (1.7, 1.2), (2.0, 1.4), (2.4, 1.7)]
-    # plt.clabel(CS, inline=1, fontsize=10, manual=manual_locations)
-    plt.clabel(CS, inline=1, fontsize=10)
-    plt.title('Sequence of iterates')
-    plt.plot(xstar[0],xstar[1],'ok') # optimum
-    plt.plot(x0[0],x0[1],'or') # starting point
+        # Plot contour
+        CS = plt.contour(X, Y, Z)
+        plt.clabel(CS, inline=1, fontsize=10)
+        plt.title('Sequence of iterates')
+        plt.plot(xstar[0],xstar[1],'ok') # optimum
+        plt.plot(x0[0],x0[1],'or') # starting point
 
-    # Overlay point sequence
-    for i in range(np.shape(Xs)[0]-1):
-        plt.plot([Xs[i][0],Xs[i+1][0]],[Xs[i][1],Xs[i+1][1]],'b')
+        # Overlay point sequence
+        for i in range(np.shape(Xs)[0]-1):
+            plt.plot([Xs[i][0],Xs[i+1][0]],[Xs[i][1],Xs[i+1][1]],'b')
 
-    # SciPy point sequence
-    for i in range(np.shape(res[1])[0]-1):
-        plt.plot([res[1][i][0],res[1][i+1][0]],[res[1][i][1],res[1][i+1][1]],'r')
+        ### Compare against SciPy
+        if (comsci==True):
+            # SciPy point sequence
+            for i in range(np.shape(res[1])[0]-1):
+                plt.plot([res[1][i][0],res[1][i+1][0]],\
+                         [res[1][i][1],res[1][i+1][1]],'r--')
 
-    plt.show()
+        plt.show()
