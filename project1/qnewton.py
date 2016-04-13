@@ -19,16 +19,21 @@ def bfgs(H,delta,gamma):
     # Limit the 1/delta^T*gamma value
     # - I learned this by studying the SciPy
     # - implementation of BFGS
-    try:
-        k = 1.0 / dot(delta,gamma)
-    except ZeroDivisionError:
-        rhok = 1000.0
+    # try:
+    #     k = 1.0 / dot(delta,gamma)
+    # except ZeroDivisionError:
+    #     k = 1000.0
+    val = dot(delta,gamma)
+    if val < 1e-3:
+        k = 1000.0
+    else:
+        k = 1.0 / val
     # Compute update
     T1 = (I-outer(delta,gamma)*k)
     T2 = (I-outer(gamma,delta)*k)
     return dot(T1,dot(H,T2)) + outer(delta,delta)*k
 
-def qnewton(fcn,x0,evalMax,eps=1e-10,lin=0,nIter=1e10,\
+def qnewton(fcn,x0,evalMax,eps=np.finfo(float).eps,lin=0,nIter=1e10,\
             qtype=1):
     """Quasi-Newton Method
     Usage
