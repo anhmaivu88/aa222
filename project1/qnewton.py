@@ -19,10 +19,6 @@ def bfgs(H,delta,gamma):
     # Limit the 1/delta^T*gamma value
     # - I learned this by studying the SciPy
     # - implementation of BFGS
-    # try:
-    #     k = 1.0 / dot(delta,gamma)
-    # except ZeroDivisionError:
-    #     k = 1000.0
     val = dot(delta,gamma)
     if val < 1e-3:
         k = 1000.0
