@@ -1113,11 +1113,11 @@ def gh(func):
                 return func(xa, *args).hessian([xa])
 
     # customize the documentation with the input function name
-    # for f, name in zip([grad, hess], ['gradient', 'hessian']):
-        # f.__doc__ =  'The %s of %s, '%(name, func.__name__)
-        # f.__doc__ += 'calculated using automatic\ndifferentiation.\n\n'
-        # if func.__doc__ is not None and isinstance(func.__doc__, str):
-        #     f.__doc__ += 'Original documentation:\n'+func.__doc__
+    for f, name in zip([grad, hess], ['gradient', 'hessian']):
+        f.__doc__ =  'The %s of %s, '%(name, func.__name__)
+        f.__doc__ += 'calculated using automatic\ndifferentiation.\n\n'
+        if func.__doc__ is not None and isinstance(func.__doc__, str):
+            f.__doc__ += 'Original documentation:\n'+func.__doc__
 
     return grad, hess
         
