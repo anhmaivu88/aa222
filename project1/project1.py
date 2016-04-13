@@ -5,6 +5,11 @@ def unconstrained_optimization(f,x0,maxEval):
     # Call the solver
     xs,fs,ct,Xs,it = qnewton(f,x0,maxEval)
 
+    # Debug printout
+    print "f(xs)=%f" % fs
+    print "calls=%d" % ct
+    print "iter=%d" % it
+    
     # Return the optimal value
     return fs
 
