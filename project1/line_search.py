@@ -24,7 +24,7 @@ def backtrack(x0,f,m,p,f0,alp=1.5,tau=0.5,c=0.5,em=100):
     cnt = 0
     t   = -c*m
     # Evaluate first test point
-    f1 = f(x0+alp*p)
+    f1 = f(x0+alp*p); cnt += 1
     # Iterate backtracking
     while ((f0-f1) < alp*t) and (cnt<em):
         # Iterate

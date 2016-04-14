@@ -1,5 +1,5 @@
 # from qnewton_ad import qnewton # using automatic differentiation
-from qnewton import qnewton # using automatic differentiation
+from qnewton import qnewton # using finite differences
 
 def unconstrained_optimization(f,x0,maxEval):
     # Call the solver
