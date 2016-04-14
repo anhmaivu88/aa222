@@ -1,0 +1,130 @@
+\documentclass{article}
+
+% AMS math symbols
+\usepackage{amsmath}
+\usepackage{mathabx}
+% Header
+\usepackage{fancyhdr}
+% Margins
+\usepackage[top=1in, bottom=1in, left=1in, right=1in]{geometry}
+% Include images, disable floating
+\usepackage{graphicx,float}
+% Image Macro: \img{filename}{caption}
+\newcommand{\img}[2]{
+	\begin{figure}[H]
+	\centering%
+	% first argument is the file
+	\includegraphics[width=0.6\textwidth]{./#1}
+	\caption{#2}     % second argument is caption
+	\label{fig:#1}   % generate label from first argument
+	\end{figure} }
+% Code formatting
+\usepackage{listings}
+
+% Bold symbol macro
+\newcommand{\bs}[1]{\boldsymbol{#1}}
+
+\pagestyle{fancy}
+
+%------------------------------------------------------------------------
+%	BEGIN DOCUMENT
+%------------------------------------------------------------------------
+
+\begin{document}
+
+%------------------------------------------------------------------------
+%	HEADER
+%------------------------------------------------------------------------
+
+\fancyhead[LO,L]{AA222 Project1}
+\fancyhead[CO,C]{Unconstrained Optimization}
+\fancyhead[RO,R]{Zachary del Rosario}
+
+%------------------------------------------------------------------------
+%	CONTENT
+%------------------------------------------------------------------------
+
+%----------------------------------
+\section{Introduction}
+%----------------------------------
+The purpose of this project was to implement an unconstrained optimization routine designed to minimize the number of function calls. I elected to implement a quasi-Newton method in Python.
+
+%----------------------------------
+\section{Solver}
+%----------------------------------
+My solver consists of two major pieces: a quasi-Newton method to find the search direction, and simple backtracking to find the step size. I compute the gradient using finite differences with a fixed step size, and measure convergence based on the 2-norm of the gradient.
+
+\subsection{Quasi-Newton Methods}
+The solver I chose to implement is a simple quasi-Newton solver with a backtracking line search. Quasi-Newton, as the name implies, attempts to use Hessian information for a local quadratic fit, which informs the step direction. The update formula for quasi-Newton is
+
+\begin{equation}
+\bs{x}_{k+1} = \bs{x}_{k} - \alpha_k \bs{H}_k \nabla f(\bs{x}_k),
+\end{equation}
+
+where $\bs{H}_k$ is an approximation to the inverse of the Hessian $\nabla^2 f$. We start with a symmetric positive-definite approximation of $\nabla^2 f$ (in practice $\bs{H}_0=\bs{I}$) and perform successive rank one updates on $\bs{H}_k$ based on gradient information. Since the Hessian is the second derivative of $f$, we can consider $\nabla^2 f$ to be the derivative of the gradient $\nabla f$. From a truncation of the Taylor series of $\nabla f$, we find
+
+\begin{equation}
+\left[\nabla^2 f(\bs{x}_k)\right](\bs{x}_{k+1}-\bs{x}_k) = \nabla f(\bs{x}_{k+1}) - \nabla f(\bs{x}_k). \label{eq:quasi_newton_condition}
+\end{equation}
+
+Many schemes have been devised to satisfy the quasi-Newton condition (Eq. \ref{eq:quasi_newton_condition}) given above. Belegundo and Chandrupatla recommend the Broyden, Fletcher, Goldfarb, and Shanno (BFGS) scheme when using an approximate line search. Adopting the notation $\bs{\delta}_k=\bs{x}_{k+1}-\bs{x}_k$ and $\bs{\gamma}_k=\nabla f(\bs{x}_{k+1}) - \nabla f(\bs{x}_k)$, the BFGS update is
+
+\begin{equation}
+\bs{\nabla^2 f}^{BFGS}_{k+1} = H - \left(\frac{\bs{\delta}\bs{\gamma}^TH+H\bs{\gamma}\bs{\delta}^T}{\bs{\delta}^T\bs{\gamma}}\right) + \left(1+\frac{\bs{\gamma}^TH\bs{\gamma}}{\bs{\delta}^T\bs{\gamma}}\right)\frac{\bs{\delta}\bs{\delta}^T}{\bs{\delta}^T\bs{\gamma}}. \label{eq:bfgs_hessian}
+\end{equation}
+
+Comparing Formula \ref{eq:bfgs_hessian} with the Wikipedia article, I think Belegundo and Chandrupatla mistakenly gave the Hessian update formula in place of the inverse formula -- I haven't checked their math thoroughly, but using the above for the inverse Hessian gives garbage results. Rather than muck around with direct matrix inversions, we can perform a rank one update on the inverse directly, resulting in
+
+\begin{equation}
+\bs{H}^{BFGS}_{k+1} = \left(\bs{I}-\frac{\bs{\delta}\bs{\gamma}^T}{\bs{\delta}^T\bs{\gamma}}\right)H_{k}\left(\bs{I}-\frac{\bs{\gamma}\bs{\delta}^T}{\bs{\delta}^T\bs{\gamma}}\right) + \frac{\bs{\delta}\bs{\delta}^T}{\bs{\delta}^T\bs{\gamma}}. \label{eq:bfgs_inverse}
+\end{equation}
+
+Applying Formula \ref{eq:bfgs_inverse} directly results in some nasty numerical precision errors -- in cases where $\bs{\delta}$ and $\bs{\gamma}$ are nearly orthogonal, their dot product approaches zero, leading to issues of numerical precision. In practice, I limit the value $1/\bs{\delta}^T\bs{\gamma}\leq 1000$ to avoid such issues -- this was a technique I found in the SciPy implementation of BFGS.
+
+\subsection{Line Search}
+
+The Quasi-Newton method gives us a search direction, but unlike true Newton's method we do not solve the quadratic problem to find the step size. For my line search, I used a simple backtracking method. I start with a fixed initial step size $\alpha=1.5$ and repeatedly sample points along the line with geometrically smaller step sizes (factors of $1/2$) until a desired reduction in function value is achieved. I found that this method works decently well in practice, but is outperformed by SciPy's implementation of the Wolfe conditions.
+
+%----------------------------------
+\section{Results}
+%----------------------------------
+
+\subsection{Finite Differences}
+For the project submission, I employed Finite Differences to approximate the gradient. The results of this version of the solver are given below.
+
+\img{trajectories_fd}{Trajectories of solver in function domain. Note that the solver tends to get `lost' at various points in the domain -- the green trajectory takes an excursion off to the left before settling back into a path to the optimum value, while the red trajectory overshoots considerably before returning to the optimum. Comparing against SciPy, I believe that my linesearch is the problem, as my solver takes roughly the same turns as SciPy, but different step sizes. It bothers me that my line search is quite so poor, but I really need to get back to working on other things...}
+
+\img{convergence_fd}{Convergence plots for solver on various objective functions. The solver `bottoms out' at some point, due to numerical precision issues. This differs based on the function -- my convergence criterion is based on the 2-norm of the gradient, so if the function is shallow near the optimum, the solver will quit further away than if the function were steep.}
+
+\subsection{Automatic Differentiation}
+In working on the project, I also implemented my solver using automatic differentiaion based on the `ad' package in Python. While this version was unable to interface with the submission code, I'm showing the results here because they're interesting to compare.
+
+\img{trajectories_ad}{Qualitatively, automatic differentiation performs similarly. Some of the excursions in the function domain are still dominated by a poor line search, note that the red overshoot is far less though. A more accurate approximation of the gradient leads to a better line search, and faster convergence.}
+
+\img{convergence_ad}{Note that automatic differentiation is able to reach a tighter tolerance than the finite difference implementation; this is likely due to both the greater accuracy and my convergence criterion, which is based on the 2-norm of the gradient.}
+
+%------------------------------------------------------------------------
+%	REFERENCE LIST
+%------------------------------------------------------------------------
+
+\begin{thebibliography}{99}
+
+\bibitem[1]{mdo}
+Belegundo, A.D., Chandrupatla, T.R.,
+\newblock \emph{Optimization Concepts and Applications in Engineering.}.
+
+\bibitem[2]{scipy}
+Jones, E., Oliphant, T., Peterson, P.,
+\newblock \emph{SciPy: Open Source Scientific Tools for Python}, 2001.
+
+\bibitem[3]{wiki}
+Wikipedia contributors,
+\newblock \emph{Quasi-Newton method}, retrieved 14 April 2016 4:00 UTC
+
+\bibitem[4]{ad}
+Lee, A.,
+\newblock \emph{ad 1.3.2: Fast, transparent first- and second-order automatic differentiation}
+
+\end{thebibliography}
+
+\end{document}
