@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from scipy.optimize import fmin_bfgs
 
 # Custom libraries
-from unconstrained_optimization import opt_full
+from project1 import opt_full
 
 ### Setup
 # Choose objective function
@@ -12,20 +12,20 @@ from unconstrained_optimization import opt_full
 # from rosenbrock import fcn 
 # xstar = [1,1]; x0 = [1,1.5]
 ## Simple quadratic function
-# from simple_quad import fcn
-# xstar = [0,0]; x0 = [1,1.5]
+from simple_quad import fcn
+xstar = [0,0]; x0 = [1,1.5]
 ## Wood function
 # from wood import fcn
 # xstar = [1,1,1,1]; x0 = [0,0,0,0]
 ## Powell function
-from powell import fcn
-xstar = [0,0,0,0]; x0 = [1,1,1,1]
+# from powell import fcn
+# xstar = [0,0,0,0]; x0 = [1,1,1,1]
 
 # Set parameters
 nIter = 100
 nCall = 1e4
 comsci = True      # compare vs SciPy
-plotting = False    # plot the result
+plotting = True    # plot the result
 
 ### Solver call
 xs,fs,ct,Xs,it = opt_full(fcn,x0,nCall)
