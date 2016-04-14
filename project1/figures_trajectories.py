@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from scipy.optimize import fmin_bfgs
 
 # Custom libraries
-from unconstrained_optimization import opt_full
+from project1 import opt_full
 
 ### ----- TRAJECTORIES ----- ###
 ### Setup
@@ -49,7 +49,8 @@ plt.figure()
 # Plot contour
 CS = plt.contour(X, Y, Z)
 plt.clabel(CS, inline=1, fontsize=10)
-plt.title('Sequence of iterates')
+# plt.title('Sequence of Iterates: Finite Differences')
+plt.title('Sequence of Iterates: Automatic Differentiation')
 plt.plot(xstar[0],xstar[1],'ok') # optimum
 plt.plot(x0[0],x0[1],'ob') # starting point
 plt.plot(x1[0],x1[1],'or')
@@ -69,5 +70,3 @@ for i in range(np.shape(Xs2)[0]-1):
              [Xs2[i][1],Xs2[i+1][1]],'g')
 
 plt.show()
-
-### ----- CONVERGENCE ----- ###
