@@ -4,24 +4,42 @@ import matplotlib.pyplot as plt
 from scipy.optimize import fmin_bfgs
 
 # Custom libraries
-from project1 import opt_full
+from barrier import feasibility_problem, ext_obj
+from cg import cg
+from project2 import opt_full
 
 ### Setup
+
 # Choose problem
+
 ## Example 1
-from example1 import f,g,x_star,f_star
-x0 = [0,0]
+# from example1 import f,g,x_star,f_star, constraints, xc
+# x0 = [0,1]
+
+## Example 2
+# from example2 import f,g,x_star,f_star, constraints, xc
+# x0 = [0,0.5]
+
+## Example 3
+from example3 import f,g,x_star,f_star
+x0 = [0,1,0]
 
 # Set parameters
 nIter = 100
-nCall = 1e4
-comsci = True      # compare vs SciPy
-plotting = True    # plot the result
+evalMax = 1000
+comsci = False     # compare vs SciPy
+plotting = False    # plot the result
+
+s = 1e-1
+g_ext = lambda x: ext_obj(g(x),s)
 
 ### Solver call
-xs,fs,ct,Xs,it = opt_full(f,x0,nCall)
+# xf, gf, ct, Xs, it = feasibility_problem(g,x0,evalMax,slack=s)
+xs, fs, ct, Xs, it = opt_full(f,g,x0,evalMax)
 
-print "f(xs)=%f" % fs
+print(x_star)
+
+print "fs(xs)=%f" % fs
 print "calls=%d" % ct
 print "iter=%d" % it
 
@@ -33,10 +51,10 @@ if comsci==True:
 if plotting == True:
     # Define meshgrid
     delta = 0.025
-    x = np.arange(min(x0[0],xstar[0])-0.5, \
-                  max(x0[0],xstar[0])+0.5, delta)
-    y = np.arange(min(x0[1],xstar[1])-0.5, \
-                  max(x0[1],xstar[1])+0.5, delta)
+    x = np.arange(min(x0[0],x_star[0])-0.5, \
+                  max(x0[0],x_star[0])+0.5, delta)
+    y = np.arange(min(x0[1],x_star[1])-0.5, \
+                  max(x0[1],x_star[1])+0.5, delta)
     X, Y = np.meshgrid(x, y)
     dim = np.shape(X)
     # Compute function values
@@ -51,16 +69,22 @@ if plotting == True:
     # Open figure
     plt.figure()
 
-    # Plot contour
+    # Plot objective contours
     CS = plt.contour(X, Y, Z)
     plt.clabel(CS, inline=1, fontsize=10)
     plt.title('Sequence of iterates')
-    plt.plot(xstar[0],xstar[1],'ok') # optimum
-    plt.plot(x0[0],x0[1],'or') # starting point
+    plt.plot(x_star[0],x_star[1],'xk') # optimum
+    plt.xlim([np.min(X),np.max(X)])
+    plt.ylim([np.min(Y),np.max(Y)])
+
+    # Plot constraints
+    for con in constraints:
+        plt.plot(xc,con(xc),'k-')
 
     # Overlay point sequence
     for i in range(np.shape(Xs)[0]-1):
-        plt.plot([Xs[i][0],Xs[i+1][0]],[Xs[i][1],Xs[i+1][1]],'b')
+        plt.plot([Xs[i][0],Xs[i+1][0]],[Xs[i][1],Xs[i+1][1]],'b-o')
+    plt.plot(x0[0],x0[1],'or') # starting point
 
     ### Compare against SciPy
     if (comsci==True):

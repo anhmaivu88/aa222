@@ -30,7 +30,7 @@ def bfgs(H,delta,gamma):
     return dot(T1,dot(H,T2)) + outer(delta,delta)*k
 
 def qnewton(fcn,x0,evalMax,eps=np.finfo(float).eps,lin=0,nIter=1e10,\
-            qtype=1):
+            qtype=1,fk=None,dF0=None,Hk=None):
     """Quasi-Newton Method
     Usage
     (x0, f0, ct, X, it) = qnewton(f,x0,evalMax)
@@ -45,10 +45,15 @@ def qnewton(fcn,x0,evalMax,eps=np.finfo(float).eps,lin=0,nIter=1e10,\
     lin     = linsearch type (0=backtracking,1=quad fit)
     nIter   = maximum iterations
     qtype   = hessian update type (0=DFP,1=BFGS)
+    fk      = initial function value
+    dF0     = initial function gradient
+    Hk      = initial inverse Hessian approximation
     
     Returns
     xs      = minimal point
     fs      = minimal value
+    dFs     = minimal point gradient
+    Hs      = minimal point inv Hessian approx
     ct      = number of function evaluations
     X       = sequence of points
     it      = number of iterations used
@@ -66,12 +71,15 @@ def qnewton(fcn,x0,evalMax,eps=np.finfo(float).eps,lin=0,nIter=1e10,\
     x0  = np.array(x0)   # initial guess
     X   = np.array([x0]) # point history
     n   = np.size(x0)    # dim of problem
-    fk  = fcn(x0);  ct += 1
+    if fk == None:
+        fk  = fcn(x0);  ct += 1
     err = eps * 2        # initial error
     ### Initial direction: steepest descent
-    dF0 = grad(x0,fcn,fk);      ct += n
+    if dF0 == None:
+        dF0 = grad(x0,fcn,fk);      ct += n
     d0  = -dF0
-    Hk  = np.eye(n)
+    if Hk == None:
+        Hk  = np.eye(n)
 
     ### Main Loop
     while (err>eps) and (ct<evalMax) and (it<nIter):
@@ -93,7 +101,7 @@ def qnewton(fcn,x0,evalMax,eps=np.finfo(float).eps,lin=0,nIter=1e10,\
         if (ct+n<evalMax):
             dF1 = grad(x1,fcn,fk);      ct += n
         else:
-            return x0, fk, ct, X, it
+            return x0, fk, dF0, Hk, ct, X, it
         delta = x1 - x0
         gamma = dF1-dF0
         Hk = update(Hk,delta,gamma)
@@ -106,4 +114,4 @@ def qnewton(fcn,x0,evalMax,eps=np.finfo(float).eps,lin=0,nIter=1e10,\
         it += 1
 
     # Complete qNewton solve
-    return x0, fk, ct, X, it
+    return x0, fk, dF0, Hk, ct, X, it

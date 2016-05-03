@@ -5,24 +5,33 @@ from scipy.optimize import fmin_bfgs
 from numpy.linalg import norm
 
 # Version
-from qnewton_ad import qnewton; title_ext = "Automatic Differentiation"
-# from qnewton import qnewton; title_ext = "Finite Differences"
+from project2 import opt_full
 
 ### ----- CONVERGENCE ----- ###
 ### Setup
-# Rosenbrock function
-from rosenbrock import fcn as fcn0
-xstar0 = [1,1]; x0 = [-0.5,-0.5]; title0="Rosenbrock"
-# Wood function
-from wood import fcn as fcn1
-xstar1 = [1,1,1,1]; x1 = [0,0,0,0]; title1="Wood"
-# Powell function
-from powell import fcn as fcn2
-xstar2 = [0,0,0,0]; x2 = [1,1,1,1]; title2="Powell"
+# Example 1
+title0='Example 1'
+from example1 import f as f0
+from example1 import g as g0
+from example1 import x_star as xstar0
+x0 = [0,1]
+# Example 2
+title1='Example 2'
+from example2 import f as f1
+from example2 import g as g1
+from example2 import x_star as xstar1
+x1 = [0,1]
+# Example 3
+title2='Example 3'
+from example3 import f as f2
+from example3 import g as g2
+from example3 import x_star as xstar2
+x2 = [0,1,0]
 
 Xstar = [xstar0,xstar1,xstar2]
 X0    = [x0,x1,x2]
-Fcn   = [fcn0,fcn1,fcn2]
+Fcn   = [f0,f1,f2]
+Con   = [g0,g1,g2]
 Label = [title0,title1,title2]
 
 # Set parameters
@@ -34,7 +43,8 @@ for i in range(len(Xstar)):
 
     for c in Calls:
         ### Solver call
-        xs0,_,_,_,_ = qnewton(Fcn[i],X0[i],c)
+        # xs0,_,_,_,_ = qnewton(Fcn[i],X0[i],c)
+        xs0, _, _, _, _ = opt_full(Fcn[i],Con[i],X0[i],c)
         # Error calculation
         err = norm(xs0-Xstar[i])
         Error[i].append(err)
@@ -44,7 +54,7 @@ for i in range(len(Xstar)):
 plt.figure()
 
 # Plot convergence history
-plt.title('Error vs Evaluation Limit: '+title_ext)
+plt.title('Error vs Evaluation Limit')
 plt.loglog(Calls,Error[0],'.-b',label=Label[0])
 plt.loglog(Calls,Error[1],'.-r',label=Label[1])
 plt.loglog(Calls,Error[2],'.-g',label=Label[2])
