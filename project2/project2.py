@@ -2,7 +2,7 @@
 import numpy as np
 # Custom libraries
 from qnewton import qnewton # quasi-Newton method using finite differences
-from barrier import feasibility_problem, log_barrier
+from barrier import feasibility_problem, log_barrier, inv_barrier
 
 ### TODO:
 # Interior Point Method:

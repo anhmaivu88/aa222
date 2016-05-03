@@ -1,7 +1,6 @@
 # Standard libraries
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.optimize import fmin_bfgs
 from numpy.linalg import norm
 
 # Version

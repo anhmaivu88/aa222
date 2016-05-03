@@ -39,7 +39,6 @@ def log_barrier(g):
         else:
             if val >= 0:
                 res = float('inf')
-                # res = res + exp(val)
             else:
                 res = res - log(-val)
     return res
@@ -72,7 +71,6 @@ def feasible(g):
     slack = 1e-1
     res = True
     for val in g:
-        # res = res and (val<=0)
         res = res and (val<0)
     return res
 
