@@ -79,11 +79,17 @@ with some minor modifications. As Belegundo and Chandrupatla recommend, I define
 parameterized by $r>0$. I define the problem sequence by starting with an initial value for $r$ (In practice $r_0=100$), multiply $r$ by a factor of two for each subproblem, and define a gradient tolerance for convergence $\|\nabla f\|_2<1/r$. This allows early problems in the sequence to be somewhat loosely converged, allowing us to get near the optimal point with fewer function calls, saving our computational budget for when we're close enough for tight convergence. In practice, I found that increasing $r$ too much lead to stability issues, so I set a ceiling at $r_{\max}=1000$ and set the smallest gradient tolerance to machine epsilon (which is never achieved via $1/r$, but set at $r_{\max}$).
 
 %----------------------------------
+\section{A Note on Finite Differences}
+%----------------------------------
+
+The TA (Jon Cox) recommended I try to call Julia from Python, in order to take advantage of the Dual Numbers package. I thought this was a great idea! Unfortunately, I elected not to figure this out -- looking at various Python-Julia interfaces online, most claimed to be fairly `immature'. I figured since the coders owned up to the fact that their interfaces were not super stable, it would take a fair bit of work to get this kind of functionality working. Additionally, since I'm not learning Julia at the moment, it seemed like waste of time to try hacking together an interface for a language I don't use, for a piece of code I'll only use once (for this project). Sorry guys, you haven't sold Julia to me just yet. (Maybe I'll pick it up once the language matures a bit more -- the unicode character thing is pretty sick.)
+
+%----------------------------------
 \section{Results}
 %----------------------------------
 This section presents some results from the solver implementation described above.
 
-\img{trajectories_1}{Trajectories of solver in parameter space on Example function 1. This figure clearly shows the two phases of the solver. Notice how for each starting point the solver goes straight for the feasible region, roughly orthogonal to the nearest constraint. Here the Feasibility Solver gets us to the feasible set very quickly! The solver then switches to the Interior Point Solver, which tends to follow the constraints to the optimal point -- this is because the Barrier Function creates something of a `channel' which runs towards the optimal point.}
+\img{trajectories_1}{Trajectories of solver in parameter space on Example function 1. This figure clearly shows the two phases of the solver. Notice how for each starting point the solver goes straight for the feasible region, roughly orthogonal to the nearest constraint. Here the Feasibility Solver gets us to the feasible set very quickly! The solver then switches to the Interior Point Solver, which tends to follow the constraints to the optimal point -- this is because the Barrier Function creates something of a `channel' which runs towards $\bs{x}^*$.}
 
 \img{trajectories_2}{Trajectories of solver in parameter space on Example function 2. The green and blue trajectories in the Feasible Phase behave similar to those in Example 1. However, the red trajectory seems to get lost. I am unsure whether this is an issue with the exterior objective function (Eq. \ref{eq:exterior}) or my CG solver.}
 
