@@ -49,7 +49,45 @@ where $g:\mathbb{R}^k\to\mathbb{R}$. Such a function varies only along the range
 f(\vx) = x_1^2 - 2x_2^2. \label{eq:example}
 \end{equation}
 
-Note that such a function does not fit the definition of a ridge function above. While approximate Active Subspaces are possible and indeed useful in practice, for Equation \ref{eq:example} above over any modestly big region of $\mathbb{R}^2$, no accurate Active Subspace is possible.
+Note that such a function does not fit the definition of a ridge function above. While approximate Active Subspaces are possible and indeed useful in practice, for Equation \ref{eq:example} above over any modestly big region of $\mathbb{R}^2$, no accurate Active Subspace is possible. Note that for our example function, we can always move orthogonal to the gradient and see no change in our QoI -- in this sense the function can be parameterized by only one variable.
+
+%------------------------------------------------------
+\section{Approach}
+%------------------------------------------------------
+There are many challenges associated with this idea, so the scope of the project will be limited to keep things tractable. The focus will be on identifying manifolds in parameter space $\mathbb{R}^d$ along which the quantity of interest does not change. A separate problem is using these manifolds to efficiently parameterize a function -- this will not be addressed in this project. Stated mathematically, we seek $W(\vx)\in\mathbb{R}^{d\times k}$ with $k < d$ such that
+
+\begin{equation}
+W^T(\vx)\nabla f(\vx) = 0, \label{eq:inactive}
+\end{equation}
+
+where $W(\vx)$ defines Inactive Manifolds, and $k$ is as large as possible. The space of all possible $W$ is infinite-dimensional, and thus not computationally tractable. In order to attack this problem computationally, we will parameterize $W$ with a number of test manifolds, and find a subset which satisfy the requirements above. Define
+
+\begin{equation}
+W_{\alpha}(\vx) \equiv [\nabla\phi_1(\vx)\alpha_1,\dots,\nabla\phi_l(\vx)\alpha_l]
+\end{equation}
+
+where $W_{\alpha}$ defines $l$ manifolds; more than the $k$ that exist. We then enforce Equation \ref{eq:inactive} at a finite number of sampled points $\vx\in\mathbb{R}^d$. Since $W_{\alpha}$ is linear in $\alpha$, we effectively have a nullspace equation for $\alpha$
+
+\begin{equation}
+M\vsym{\alpha} = 0. \label{eq:nullspace}
+\end{equation}
+
+Equation \ref{eq:nullspace} only holds when there exists an exact family of Inactive Manifolds; in practice we must solve a minimization problem to arrive at an approximate answer. However, since Equation \ref{eq:nullspace} is a nullspace computation, there always exists a trivial answer $\vsym{\alpha}=0$. Also note that we seek to find a dense solution for $\alpha$; that is, one which contains many nonzero entries -- the more Inactive Manifolds we can find, the better. It is well known that $l1$ minimization encourages sparsity; for instance, see Reference \cite{donoho2006}. Conversely, it seems that $l1$ \emph{maximization} should encourage density -- this is a conjecture that will be tested in the course of the project. Assuming that $l1$ maximization works as suggested, the proposed approximation to Equation \ref{eq:nullspace} is given by
+
+\begin{equation}
+\begin{aligned}
+\text{min  }\, &\|M\vsym{\alpha}\|_2 - \beta\|\alpha\|_1, \label{opt:am} \\
+\text{s.t. }\, &\|\alpha\|_2 \leq 1.
+\end{aligned}
+\end{equation}
+
+The $l2$ inequality constraint is added to prevent the solution from running to infinity (at which point the $l1$ term would dominate), and $\beta$ is a tunable parameter added to achieve the desired scaling between scalarized objectives. This is a non-linear optimization problem with convex constraints, but a non-convex objective function. The function is continuous over a compact set $\Omega$, thus it attains a minimum in $\Omega$ (Extreme Value Theorem). However, since the objective is non-convex, a unique global minimum is not guaranteed to exist.
+
+To solve Formulation \ref{opt:am}, I propose to use an interior point method using BFGS and log-barrier functions. I have already implemented such a method for the previous project, so applying the optimization routine should be straightforward. It is likely that I will replace my own BFGS implementation for that of SciPy, as theirs is better tuned. \cite{jones2001} The primary difficulties I anticipate are in the problem formulation -- I suspect Formulation \ref{opt:am} is not well-posed, with different local minima. To help detect local minima, I may explore solving the dual problem to study the duality gap, or employ a stochastic optimization routine. More importantly, I anticipate needing to make modifications to the problem statement; one simple addition would be to restrict $\Omega$ to a half-space, as the negative of any vector is simply repeat information, with respect to Equation \ref{eq:nullspace}.
+
+%------------------------------------------------------
+\section{Measuring Success}
+%------------------------------------------------------
 
 
 % -------------------------------------
