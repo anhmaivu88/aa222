@@ -11,6 +11,16 @@ Proposal requirements:
 - Describe how you will measure success
 
 -------------------------------------------------
+Project Milestone Outline
+-------------------------------------------------
+- Check l1 maximization conjecture
+- Hook SciPy BFGS to Interior Point (IP) code
+- Test IP on first formulation
+	- Analyze results and reformulate as necessary
+- Attempt to recover Active Subspace results
+- Attempt to 'beat' Active Subspaces
+
+-------------------------------------------------
 Proposal outline
 -------------------------------------------------
 
