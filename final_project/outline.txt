@@ -49,3 +49,4 @@ Measuring Success:
 	- It's possible that the current formulation will not recover AS; in this case I'll need to tune the problem statement until it does
 - Once I have minimal functionality, I'll move on to seeking Active Manifolds
 	- If we can obtain a smaller error or a smaller dimensionality of alpha than the Active Subspace case, then we've found something novel!
+	- We may fail to beat Active Subspaces for many reasons, such as a poor choice of basis
