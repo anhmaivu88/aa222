@@ -1,0 +1,77 @@
+% Zach del Rosario's LaTeX macros, May 2016
+% Inspired by Paul Constantine's macros
+
+% Image Macro: \img{filename}{caption}
+\newcommand{\img}[2]{
+	\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.6\textwidth]{../images/#1}   % first argument is the file
+	\caption{#2}                  % second argument is caption
+	\label{fig:#1}                % generate label from first argument
+	\end{figure} }
+
+% Table Macro: \tab{filename}{caption}
+\newcommand{\tab}[2]{
+	\begin{table}[H]
+	\centering
+	\input{../tables/#1.tex} 	% first argument is filename
+	\caption{#2} 				% second argument is caption
+	\label{tab:#1} 				% generatae label from filename
+	\end{table}
+}
+
+% Vector symbol macros
+\newcommand{\va}{\boldsymbol{a}}
+\newcommand{\vb}{\boldsymbol{b}}
+\newcommand{\vc}{\boldsymbol{c}}
+\newcommand{\vd}{\boldsymbol{d}}
+\newcommand{\ve}{\boldsymbol{e}}
+\newcommand{\vf}{\boldsymbol{f}}
+\newcommand{\vg}{\boldsymbol{g}}
+\newcommand{\vh}{\boldsymbol{h}}
+\newcommand{\vi}{\boldsymbol{i}}
+\newcommand{\vj}{\boldsymbol{j}}
+\newcommand{\vk}{\boldsymbol{k}}
+\newcommand{\vl}{\boldsymbol{l}}
+\newcommand{\vm}{\boldsymbol{m}}
+\newcommand{\vn}{\boldsymbol{n}}
+\newcommand{\vo}{\boldsymbol{o}}
+\newcommand{\vp}{\boldsymbol{p}}
+\newcommand{\vq}{\boldsymbol{q}}
+\newcommand{\vr}{\boldsymbol{r}}
+\newcommand{\vs}{\boldsymbol{s}}
+\newcommand{\vt}{\boldsymbol{t}}
+\newcommand{\vu}{\boldsymbol{u}}
+\newcommand{\vv}{\boldsymbol{v}}
+\newcommand{\vw}{\boldsymbol{w}}
+\newcommand{\vx}{\boldsymbol{x}}
+\newcommand{\vy}{\boldsymbol{y}}
+\newcommand{\vz}{\boldsymbol{z}}
+
+% Vector symbol + tilde macros
+\newcommand{\vta}{\tilde{\boldsymbol{a}}}
+\newcommand{\vtb}{\tilde{\boldsymbol{b}}}
+\newcommand{\vtc}{\tilde{\boldsymbol{c}}}
+\newcommand{\vtd}{\tilde{\boldsymbol{d}}}
+\newcommand{\vte}{\tilde{\boldsymbol{e}}}
+\newcommand{\vtf}{\tilde{\boldsymbol{f}}}
+\newcommand{\vtg}{\tilde{\boldsymbol{g}}}
+\newcommand{\vth}{\tilde{\boldsymbol{h}}}
+\newcommand{\vti}{\tilde{\boldsymbol{i}}}
+\newcommand{\vtj}{\tilde{\boldsymbol{j}}}
+\newcommand{\vtk}{\tilde{\boldsymbol{k}}}
+\newcommand{\vtl}{\tilde{\boldsymbol{l}}}
+\newcommand{\vtm}{\tilde{\boldsymbol{m}}}
+\newcommand{\vtn}{\tilde{\boldsymbol{n}}}
+\newcommand{\vto}{\tilde{\boldsymbol{o}}}
+\newcommand{\vtp}{\tilde{\boldsymbol{p}}}
+\newcommand{\vtq}{\tilde{\boldsymbol{q}}}
+\newcommand{\vtr}{\tilde{\boldsymbol{r}}}
+\newcommand{\vts}{\tilde{\boldsymbol{s}}}
+\newcommand{\vtt}{\tilde{\boldsymbol{t}}}
+\newcommand{\vtu}{\tilde{\boldsymbol{u}}}
+\newcommand{\vtv}{\tilde{\boldsymbol{v}}}
+\newcommand{\vtw}{\tilde{\boldsymbol{w}}}
+\newcommand{\vtx}{\tilde{\boldsymbol{x}}}
+\newcommand{\vty}{\tilde{\boldsymbol{y}}}
+\newcommand{\vtz}{\tilde{\boldsymbol{z}}}

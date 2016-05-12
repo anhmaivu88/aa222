@@ -1,0 +1,62 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{amssymb} % \mathbb
+\usepackage{mathabx}
+\usepackage{cancel}
+\usepackage{fancyhdr}
+\usepackage{graphicx,float} % include figures, float properly
+
+\usepackage[top=1in, bottom=1in, left=1in, right=1in]{geometry}
+
+\input{../zachs_macros}
+
+\pagestyle{fancy}
+
+%------------------------------------------------------
+%	BEGIN DOCUMENT
+%------------------------------------------------------
+
+\begin{document}
+
+%------------------------------------------------------
+%	HEADER
+%------------------------------------------------------
+
+\fancyhead[LO,L]{AA222}
+\fancyhead[CO,C]{Final Project Proposal}
+\fancyhead[RO,R]{Zachary del Rosario}
+
+%------------------------------------------------------
+%	CONTENT
+%------------------------------------------------------
+
+%------------------------------------------------------
+\section{The Problem}
+%------------------------------------------------------
+One of the most challenging difficulties facing high-fidelity modeling is the treatment of high-dimensional parameter spaces: the Curse of Dimensionality. Consider a parameter study on some quantity of interest (QoI) $f$ in a space of dimension $d$; a simple heuristic is to use $10$ points per dimension, in order to well represent the parameter space. Then the total number of sample points is $10^d$. If a computer code implementing our model executes in a fixed time of $1$ second, then our parameter study execution time scales exponentially. Figure \ref{fig:curse_of_dimensionality} depicts the aforementioned scenario.
+
+\img{curse_of_dimensionality}{The Curse of Dimensionality; as dimensionality increases, the cost of many dimension-dependent studies (parameter studies, integration, etc.) increases exponentially. In this example, for modestly high-dimensional systems (say $10$) the study is already completely intractable.}
+
+The only reasonable strategy to mitigate this challenge is to perform \emph{dimension reduction}, that is, to reduce $d$. One scheme for dimension reduction of this sort is to seek \emph{Active Subspaces} -- linear subspaces in parameter space along which the majority of variation in our QoI is captured. \cite{constantine2015} Active Subspaces gives a `perfect' dimension reduction in the case that our QoI is a ridge function; that is, for $\vx\in\mathbb{R}^d$ and $A\in\mathbb{R}^{d\times k}$ with $k<d$, we have
+
+\begin{equation}
+f(\vx) = g(A^T\vx),
+\end{equation}
+
+where $g:\mathbb{R}^k\to\mathbb{R}$. Such a function varies only along the range of $A$, which can be seen clearly from the gradient $\nabla f=A\nabla g$. Since $\nabla f$ lies in the range of $A$, the gradient is zero along directions orthogonal to the range of $A$. Active Subspaces have already proven to be a useful strategy in numerous engineering and scientific computing applications, though the technique has some limitations. Consider the function $f:\mathbb{R}^2\to\mathbb{R}$ defined by
+
+\begin{equation}
+f(\vx) = x_1^2 - 2x_2^2. \label{eq:example}
+\end{equation}
+
+Note that such a function does not fit the definition of a ridge function above. While approximate Active Subspaces are possible and indeed useful in practice, for Equation \ref{eq:example} above over any modestly big region of $\mathbb{R}^2$, no accurate Active Subspace is possible.
+
+
+% -------------------------------------
+%	BIBLIOGRAPHY
+% -------------------------------------
+\bibliographystyle{plain}
+\bibliography{proposal}
+% -------------------------------------
+
+\end{document}
