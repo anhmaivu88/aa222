@@ -1,1 +1,51 @@
 Final Project -- Proposal Outline
+
+Final Project requirements:
+- Describe an approach (new or existing)
+- Apply the approach to a problem of interest
+- Analyze the performance of the approach according to a set of metrics
+
+Proposal requirements:
+- Describe problem to be solved
+- Describe the approach to be taken
+- Describe how you will measure success
+
+-------------------------------------------------
+Proposal outline
+-------------------------------------------------
+
+Problem:
+- Active Subspaces 
+	- Linear subspaces used to parameterize a function with fewer variables than its domain dimensionality
+	- Used for Dimension Reduction
+	- Don't always exist!
+- Active Manifolds
+	- Possibility to perform Dimension Reduction on functions which do not admit an Active Subspace
+	- A possible way to find AM is to solve a nonlinear optimization problem
+
+Approach:
+- Possible formulation of AM
+	- Attempt to solve the characteristic equation W^T \nabla f = 0
+	- Make computationally tractable by considering a trial basis, controlled by alpha
+		- Build a matrix of gradient samples F and trial basis functions M
+		- If an exact AM is possible, then M^T F = 0
+		- If an exact AM is not possible, then we seek to minimize \|M^T F\|
+		- Want alpha to be as dense as possible -- want many manifolds along which f is constant!
+	- Challenges: 
+		- Non-convex, non-linear optimization problem
+		- Possibly the wrong problem statement!
+	- This project will focus on solving the optimization problem; there is a further problem of using the information gained to parameterize the function
+- Interior point method
+	- I already have a method based on quasi-Newton method
+	- I may use SciPy's unconstrained minimization routine instead -- it's better tuned than mine
+	- Under the current formulation, I only need inequality constraints
+
+Measuring Success:
+- Our objective is to find a 'good' basis for parameterizing f
+- With this scheme, choosing a linear basis for phi recovers Active Subspaces; at the very least, the optimization process should recover Active Subspace results when provided with this basis
+	- If I can recover Active Subspaces, then the procedure finds the 'right' basis for a known case -- this will prove bare-minimum functionality
+		- On Ridge Functions, we can find an exact Active Subspace -- we should be able to solve this problem exactly
+		- On non-Ridge Functions, we can get an approximate Active Subspace -- compare with C formulation
+	- It's possible that the current formulation will not recover AS; in this case I'll need to tune the problem statement until it does
+- Once I have minimal functionality, I'll move on to seeking Active Manifolds
+	- If we can obtain a smaller error or a smaller dimensionality of alpha than the Active Subspace case, then we've found something novel!
