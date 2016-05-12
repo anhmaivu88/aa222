@@ -33,11 +33,11 @@
 %------------------------------------------------------
 \section{The Problem}
 %------------------------------------------------------
-One of the most challenging difficulties facing high-fidelity modeling is the treatment of high-dimensional parameter spaces: the Curse of Dimensionality. Consider a parameter study on some quantity of interest (QoI) $f$ in a space of dimension $d$; a simple heuristic is to use $10$ points per dimension, in order to well represent the parameter space. Then the total number of sample points is $10^d$. If a computer code implementing our model executes in a fixed time of $1$ second, then our parameter study execution time scales exponentially. Figure \ref{fig:curse_of_dimensionality} depicts the aforementioned scenario.
+One of the most challenging difficulties facing high-fidelity modeling is the treatment of high-dimensional parameter spaces: the Curse of Dimensionality. Consider a parameter study on some quantity of interest (QoI) $f$ in a space of dimension $m$; a simple heuristic is to use $10$ points per dimension, in order to well represent the parameter space. Then the total number of sample points is $10^m$. If a computer code implementing our model executes in a fixed time of $1$ second, then our parameter study execution time scales exponentially. Figure \ref{fig:curse_of_dimensionality} depicts the aforementioned scenario.
 
 \img{curse_of_dimensionality}{The Curse of Dimensionality; as dimensionality increases, the cost of many dimension-dependent studies (parameter studies, integration, etc.) increases exponentially. In this example, for modestly high-dimensional systems (say $10$) the study is already completely intractable.}
 
-The only reasonable strategy to mitigate this challenge is to perform \emph{dimension reduction}, that is, to reduce $d$. One scheme for dimension reduction of this sort is to seek \emph{Active Subspaces} -- linear subspaces in parameter space along which the majority of variation in our QoI is captured. \cite{constantine2015} Active Subspaces gives a `perfect' dimension reduction in the case that our QoI is a ridge function; that is, for $\vx\in\mathbb{R}^d$ and $A\in\mathbb{R}^{d\times k}$ with $k<d$, we have
+The only reasonable strategy to mitigate this challenge is to perform \emph{dimension reduction}, that is, to reduce $m$. One scheme for dimension reduction of this sort is to seek \emph{Active Subspaces} -- linear subspaces in parameter space along which the majority of variation in our QoI is captured. \cite{constantine2015} Active Subspaces gives a `perfect' dimension reduction in the case that our QoI is a ridge function; that is, for $\vx\in\mathbb{R}^m$ and $A\in\mathbb{R}^{m\times k}$ with $k<m$, we have
 
 \begin{equation}
 f(\vx) = g(A^T\vx),
@@ -49,12 +49,12 @@ where $g:\mathbb{R}^k\to\mathbb{R}$. Such a function varies only along the range
 f(\vx) = x_1^2 - 2x_2^2. \label{eq:example}
 \end{equation}
 
-Note that such a function does not fit the definition of a ridge function above. While approximate Active Subspaces are possible and indeed useful in practice, for Equation \ref{eq:example} above over any modestly big region of $\mathbb{R}^2$, no accurate Active Subspace is possible. Note that for our example function, we can always move orthogonal to the gradient and see no change in our QoI -- in this sense the function can be parameterized by only one variable.
+Note that such a function does not fit the definition of a ridge function above. While approximate Active Subspaces are possible and indeed useful in practice, for Equation \ref{eq:example} over any modestly big region of $\mathbb{R}^2$, no accurate Active Subspace is possible. Note that for our example function, we can always move orthogonal to the gradient and see no change in our QoI -- in this sense the function can be parameterized by only one variable.
 
 %------------------------------------------------------
 \section{Approach}
 %------------------------------------------------------
-There are many challenges associated with this idea, so the scope of the project will be limited to keep things tractable. The focus will be on identifying manifolds in parameter space $\mathbb{R}^d$ along which the quantity of interest does not change. A separate problem is using these manifolds to efficiently parameterize a function -- this will not be addressed in this project. Stated mathematically, we seek $W(\vx)\in\mathbb{R}^{d\times k}$ with $k < d$ such that
+There are many challenges associated with this idea, so the scope of the project will be limited to keep things tractable. The focus will be on identifying manifolds in parameter space $\mathbb{R}^m$ along which the quantity of interest does not change -- hence called \emph{Inactive Manifolds}. A separate problem is using these manifolds to efficiently parameterize a function -- this will not be addressed in this project. Stated mathematically, we seek $W(\vx)\in\mathbb{R}^{m\times k}$ with $k < m$ such that
 
 \begin{equation}
 W^T(\vx)\nabla f(\vx) = 0, \label{eq:inactive}
@@ -66,7 +66,7 @@ where $W(\vx)$ defines Inactive Manifolds, and $k$ is as large as possible. The 
 W_{\alpha}(\vx) \equiv [\nabla\phi_1(\vx)\alpha_1,\dots,\nabla\phi_l(\vx)\alpha_l]
 \end{equation}
 
-where $W_{\alpha}$ defines $l$ manifolds; more than the $k$ that exist. We then enforce Equation \ref{eq:inactive} at a finite number of sampled points $\vx\in\mathbb{R}^d$. Since $W_{\alpha}$ is linear in $\alpha$, we effectively have a nullspace equation for $\alpha$
+where $W_{\alpha}$ defines $l$ manifolds; more than the $k$ that exist. We then enforce Equation \ref{eq:inactive} at a finite number of sampled points $\vx\in\mathbb{R}^m$. Since $W_{\alpha}$ is linear in $\alpha$, we effectively have a nullspace equation for $\alpha$
 
 \begin{equation}
 M\vsym{\alpha} = 0. \label{eq:nullspace}
@@ -85,16 +85,21 @@ The $l2$ inequality constraint is added to prevent the solution from running to 
 
 To solve Formulation \ref{opt:am}, I propose to use an interior point method using BFGS and log-barrier functions. I have already implemented such a method for the previous project, so applying the optimization routine should be straightforward. It is likely that I will replace my own BFGS implementation for that of SciPy, as theirs is better tuned. \cite{jones2001} The primary difficulties I anticipate are in the problem formulation -- I suspect Formulation \ref{opt:am} is not well-posed, with different local minima. To help detect local minima, I may explore solving the dual problem to study the duality gap, or employ a stochastic optimization routine. More importantly, I anticipate needing to make modifications to the problem statement; one simple addition would be to restrict $\Omega$ to a half-space, as the negative of any vector is simply repeat information, with respect to Equation \ref{eq:nullspace}.
 
+\newpage
 %------------------------------------------------------
 \section{Measuring Success}
 %------------------------------------------------------
+Measuring success in this project will proceed in a few stages:
 
+First, I will compare against Active Subspaces. One can show that with a linear choice of basis functions $\{\phi_i=x_i\}_{i=1}^m$, we recover Active Subspaces by solving Equation \ref{eq:nullspace} with an SVD. If Formulation \ref{opt:am} gives the same results as Active Subspaces with the choice of $\phi_i$ given above, that is a good indication that the optimization problem well-approximates Equation \ref{eq:nullspace}. This will establish minimal functionality for the project.
 
-% -------------------------------------
+Second, I will use different basis functions $\phi_i$ to search for Inactive Manifolds on different QoI test cases. I have already built some cases which can be solved exactly under Equation \ref{eq:nullspace} -- I will check that the procedure can recover these solutions. Then, I will design some test cases which demand approximate Inactive Manifolds, and compare the results to Active Subspaces. The conjecture is that, in the case of Inactive Manifolds, the $l2$ error in $M\vsym{\alpha}$ should be smaller and dimensionality larger than that of the Inactive Subspace. This would show that Active Manifolds (which lie orthogonal everywhere to Inactive Manifolds) could potentially reduce the dimensionality of more general functions than can Active Subspaces -- this would be a pretty sweet result.
+
+%------------------------------------------------------
 %	BIBLIOGRAPHY
-% -------------------------------------
+%------------------------------------------------------
 \bibliographystyle{plain}
 \bibliography{proposal}
-% -------------------------------------
+%------------------------
 
 \end{document}
