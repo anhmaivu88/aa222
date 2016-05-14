@@ -1,0 +1,9 @@
+--------------------------------------------------
+Sat May 14
+--------------------------------------------------
+
+Prototype AM Optimization code
+- L1 maximization appears to work as intended
+- The process seems to (approximately) recover the expected bases, just as in the nullspace formulation!
+    - But only when I include all the basis functions  (not just the linear ones), even for the ridge function -- this is very strange!
+
