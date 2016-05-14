@@ -49,7 +49,6 @@ def constrained_opt(F,G,x0,tol=1e-8):
     it = it + 1
 
     ### Interior point problem sequence
-    
     while (err > tol):      # Not converged
         # Relax the barrier
         fcn = lambda x: F(x) + log_barrier(G(x))/r
