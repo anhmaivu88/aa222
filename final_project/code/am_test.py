@@ -13,7 +13,6 @@ from ad import gh
 ##################################################
 from interior import constrained_opt
 from barrier import feasible
-# From util/ directory
 import util
 
 ##################################################
@@ -26,19 +25,17 @@ my_base = 1         # Basis selection
 
 # Define basis functions
 if my_base == 1:
-    phi0 = lambda x: x[0];      d_phi0, _ = gh(phi0)
-    phi1 = lambda x: x[1];      d_phi1, _ = gh(phi1)
-    phi2 = lambda x: x[0]**2;   d_phi2, _ = gh(phi2)
-    phi3 = lambda x: x[1]**2;   d_phi3, _ = gh(phi3)
-    phi4 = lambda x: log(abs(x[0])); d_phi4, _ = gh(phi4)
-    phi5 = lambda x: log(abs(x[1])); d_phi5, _ = gh(phi5)
-    Phi  = (phi0,phi1,phi2,phi3,phi4,phi5)
-    dPhi = (d_phi0,d_phi1,d_phi2,d_phi3,d_phi4,d_phi5)
+    Phi = [ lambda x: x[0],
+            lambda x: x[1],
+            lambda x: x[0]**2,
+            lambda x: x[1]**2,
+            lambda x: log(abs(x[0])),
+            lambda x: log(abs(x[1]))]
 else:
-    phi0 = lambda x: x[0];      d_phi0, _ = gh(phi0)
-    phi1 = lambda x: x[1];      d_phi1, _ = gh(phi1)
-    Phi  = (phi0,phi1)
-    dPhi = (d_phi0,d_phi1)
+    Phi = [ lambda x: x[0],
+            lambda x: x[1]]
+# Gradients 
+dPhi = [gh(f)[0] for f in Phi]
 
 #################################################
 ## Experiment Cases
@@ -106,13 +103,14 @@ M = np.array(M)
 
 beta = 1.0      # tunable parameter
 def f(x):
-    # L1 maximization
+    # Residual minus L1 norm
     return norm(np.dot(M,np.array(x))) - beta * norm(x,ord=1)
 def g(x):
     # L2 constraint
     return (norm(x,ord=2) - 1,)
 # Initial guess
 x0 = [1.0] * M.shape[1]
+# x0 = random([1,M.shape[1]])
 
 ##################################################
 ## Solver
