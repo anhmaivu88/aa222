@@ -10,12 +10,12 @@ from interior import constrained_opt
 # Choose problem
 
 ## Example 1
-# from example1 import f,g,x_star,f_star, constraints, xc
-# x0 = [1.5,1]
+from example1 import f,g,x_star,f_star, constraints, xc
+x0 = [1.5,1]
 
 ## Example 2
-from example2 import f,g,x_star,f_star, constraints, xc
-x0 = [0,0.5]
+# from example2 import f,g,x_star,f_star, constraints, xc
+# x0 = [0,0.5]
 
 ## Example 3
 # from example3 import f,g,x_star,f_star
