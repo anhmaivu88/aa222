@@ -74,21 +74,31 @@ def feasible(g):
     return res
 
 if __name__ == "__main__":
-    # Test ad on an external objective
-    from ad import gh
-    from example1 import g
-    s  = 1e-1
-    G0 = lambda x: ext_obj(g(adnumber(x)),s)
-    dG0, _ = gh(G0)
-    # Return ordinary values
-    G = lambda x: G0(x).x
-    dG= lambda x: dG0(x).T
+    # # Test ad on an external objective
+    # from ad import gh
+    # from example1 import g
+    # s  = 1e-1
+    # G0 = lambda x: ext_obj(g(adnumber(x)),s)
+    # dG0, _ = gh(G0)
+    # # Return ordinary values
+    # G = lambda x: G0(x).x
+    # dG= lambda x: dG0(x).T
 
-    # Evaluate
-    x0 = np.array([2.5,2.5])
-    val = G0(x0)
-    dif = dG0(x0)
+    # # Evaluate
+    # x0 = np.array([2.5,2.5])
+    # val = G0(x0)
+    # dif = dG0(x0)
+    # # Run BFGS
+    # from scipy.optimize import minimize
+    # res = minimize(G, x0, method='BFGS', jac=dG0)
+
+    # Test ad on interior objective
+    from ad import gh
+    from example1 import g,f
+    s = 1e-1
+    fcn = lambda x: f(x) + log_barrier(g(x))/5.0
+    dfcn, _ = gh(fcn)
     # Run BFGS
     from scipy.optimize import minimize
-    # xs, X = fmin_bfgs(G0,x0,fprime=dG0,retall=True)
-    res = minimize(G, x0, method='BFGS', jac=dG0)
+    x0 = [0,0]
+    res = minimize(fcn, x0, method='BFGS', jac=dfcn)
