@@ -1,8 +1,6 @@
 # Standard libraries
 import numpy as np
 from scipy.optimize import fmin_bfgs
-from ad import gh
-from ad import adnumber
 
 # Custom libraries
 from barrier import log_barrier, inv_barrier, ext_obj
@@ -41,10 +39,8 @@ def constrained_opt(F,G,x0,tol=1e-8):
 
     ### Feasibility problem
     # G0  = ext_obj(G,s)  # exterior objective
-    G0     = lambda x: ext_obj(G(adnumber(x)),s)
-    dG0, _ = gh(G0)     # exterior objective gradient
+    G0     = lambda x: ext_obj(G(x),s)
     # Minimize G0
-    # xs, X = fmin_bfgs(G0,x0,fprime=dG0,retall=True)
     xs, X = fmin_bfgs(G0,x0,retall=True)
     it = it + 1
 
@@ -52,10 +48,8 @@ def constrained_opt(F,G,x0,tol=1e-8):
     while (err > tol):      # Not converged
         # Relax the barrier
         fcn = lambda x: F(x) + log_barrier(G(x))/r
-        dfcn, _ = gh(fcn)
         # Enforce a tighter convergence criterion
-        # xs, Xn = fmin_bfgs(fcn,xs,fprime=dfcn,retall=True)
-        xn, Xn = fmin_bfgs(fcn,xs,retall=True)
+        xn, Xn = fmin_bfgs(fcn,xs,retall=True,gtol=eps,epsilon=1e-8)
         it = it + 1 # TODO -- grab iter count from bfgs
         X = np.append(X,Xn,axis=0)
         # Increment to next problem
