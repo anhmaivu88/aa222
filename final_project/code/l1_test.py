@@ -1,18 +1,29 @@
+##################################################
 # Standard libraries
+##################################################
 import numpy as np
 import matplotlib.pyplot as plt
 from numpy.linalg import norm
+from ad.admath import log
+from numpy.random import random
+from ad import gh
 
+##################################################
 # Custom libraries
+##################################################
 from interior import constrained_opt
 from barrier import feasible
 
-### Setup
+##################################################
+# Setup
+##################################################
+# Parameters
+m = 8        # problem dimensionality
+n = int(1e2) # monte carlo samples
 
 # Problem definition
-m    = 8        # problem dimensionality
 beta = 1.0      # tunable parameter
-my_case = 0     # Problem selection
+my_case = 1     # Problem selection
 
 ### Problem: L1 Maximization, maximum distance
 if my_case == 1:
@@ -37,9 +48,15 @@ else:
     x0 = [0] * m
     x0[0] = 1e-2
 
-### Solver
+##################################################
+# Solver
+##################################################
 xs, Fs, Xs, it = constrained_opt(f,g,x0)
 
+
+##################################################
+# Results
+##################################################
 print "Case: {}".format(title)
 print "xs         = {}".format(xs)
 print "Fs(xs)     = {}".format(Fs)

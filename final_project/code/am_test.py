@@ -20,17 +20,25 @@ import util
 ## Setup
 ##################################################
 # Parameters
-n = int(1e2) # monte carlo samples
-my_case = 0     # Problem selection
+n       = int(1e2)  # monte carlo samples
+my_case = 0         # Problem selection
+my_base = 1         # Basis selection
+
 # Define basis functions
-phi0 = lambda x: x[0];      d_phi0, _ = gh(phi0)
-phi1 = lambda x: x[1];      d_phi1, _ = gh(phi1)
-phi2 = lambda x: x[0]**2;   d_phi2, _ = gh(phi2)
-phi3 = lambda x: x[1]**2;   d_phi3, _ = gh(phi3)
-phi4 = lambda x: log(abs(x[0])); d_phi4, _ = gh(phi4)
-phi5 = lambda x: log(abs(x[1])); d_phi5, _ = gh(phi5)
-Phi  = (phi0,phi1,phi2,phi3,phi4,phi5)
-dPhi = (d_phi0,d_phi1,d_phi2,d_phi3,d_phi4,d_phi5)
+if my_base == 1:
+    phi0 = lambda x: x[0];      d_phi0, _ = gh(phi0)
+    phi1 = lambda x: x[1];      d_phi1, _ = gh(phi1)
+    phi2 = lambda x: x[0]**2;   d_phi2, _ = gh(phi2)
+    phi3 = lambda x: x[1]**2;   d_phi3, _ = gh(phi3)
+    phi4 = lambda x: log(abs(x[0])); d_phi4, _ = gh(phi4)
+    phi5 = lambda x: log(abs(x[1])); d_phi5, _ = gh(phi5)
+    Phi  = (phi0,phi1,phi2,phi3,phi4,phi5)
+    dPhi = (d_phi0,d_phi1,d_phi2,d_phi3,d_phi4,d_phi5)
+else:
+    phi0 = lambda x: x[0];      d_phi0, _ = gh(phi0)
+    phi1 = lambda x: x[1];      d_phi1, _ = gh(phi1)
+    Phi  = (phi0,phi1)
+    dPhi = (d_phi0,d_phi1)
 
 #################################################
 ## Experiment Cases
@@ -78,6 +86,9 @@ else:
     # Expected basis
     B = np.array([[0.7],[-0.3],[0.],[0.],[0.],[0.]])
 
+# Normalize B
+B = B / norm(B)
+
 #################################################
 ## Monte Carlo Method
 #################################################
@@ -118,4 +129,4 @@ print "xs         = \n{}".format(xs)
 print "|M*xs|     = {}".format(residual)
 print "Feasible   = {}".format(feasible(g(xs)))
 print "iter       = {}".format(it)
-print "B^T * xs   = {}".format(np.dot(B,xs))
+# print "B^T * xs   = {}".format(np.dot(B.T,xs))
