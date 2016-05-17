@@ -41,7 +41,7 @@ def constrained_opt(F,G,x0,tol=1e-8):
     # G0  = ext_obj(G,s)  # exterior objective
     G0     = lambda x: ext_obj(G(x),s)
     # Minimize G0
-    xs, X = fmin_bfgs(G0,x0,retall=True)
+    xs, X = fmin_bfgs(G0,x0,retall=True,disp=False)
     it = it + 1
 
     ### Interior point problem sequence
@@ -49,7 +49,7 @@ def constrained_opt(F,G,x0,tol=1e-8):
         # Relax the barrier
         fcn = lambda x: F(x) + log_barrier(G(x))/r
         # Enforce a tighter convergence criterion
-        xn, Xn = fmin_bfgs(fcn,xs,retall=True,gtol=eps,epsilon=1e-8)
+        xn, Xn = fmin_bfgs(fcn,xs,retall=True,gtol=eps,epsilon=1e-8,disp=False)
         it = it + 1 # TODO -- grab iter count from bfgs
         X = np.append(X,Xn,axis=0)
         # Increment to next problem
