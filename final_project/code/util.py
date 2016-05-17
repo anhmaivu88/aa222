@@ -6,6 +6,7 @@ from numpy import dot
 from numpy import atleast_2d
 from numpy import ravel
 from numpy import reshape
+from numpy import zeros, shape, nonzero
 from copy import copy
 from math import log
 
@@ -94,6 +95,15 @@ def as_dim(Lam,eps=2.5):
     # Return dimension
     else:
         return G.index(gap)+1
+
+# Rounds by smallest non-zero magnitude vector element
+# from numpy import zeros, shape, nonzero
+def round_out(M):
+    C = zeros(shape(M))
+    for i in range(shape(M)[1]):
+        c = min(min(M[nonzero(M[:,i]),i]))
+        C[:,i] = M[:,i] / c
+    return C
 
 # Test code
 if __name__ == "__main__":
