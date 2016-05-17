@@ -15,6 +15,8 @@ from interior import constrained_opt
 from barrier import feasible
 import util
 
+from seek_am import seek_am
+
 ##################################################
 ## Setup
 ##################################################
@@ -69,26 +71,27 @@ for i in range(int(n)):
     M.append( [np.dot( dPhi[j](X[i]),grad(X[i]) ) for j in range(len(dPhi))] )
 M = np.array(M)
 
-##################################################
-## Optimization Problem
-##################################################
+# ##################################################
+# ## Optimization Problem
+# ##################################################
 
-beta = 1.0      # tunable parameter
-def f(x):
-    # Residual plus L1 norm
-    return norm(np.dot(M,np.array(x))) + beta * norm(x,ord=1)
-def g(x):
-    # L2 >= 1
-    return (-1.0*norm(x,ord=2) + 1,)
-# Initial guess
-# x0 = [1.0] * M.shape[1]
-x0 = random([1,M.shape[1]])
+# beta = 1.0      # tunable parameter
+# # Residual + L1
+# f = lambda x: norm(np.dot(M,np.array(x))) + beta * norm(x,ord=1)
+# # L2 >= 11
+# g = lambda x: (-1.0*norm(x,ord=2) + 1,)
+# # Initial guess
+# # x0 = [1.0] * M.shape[1]         # first orthant
+# x0 = random([1,M.shape[1]])     # random guess
 
-##################################################
-## Solver
-##################################################
-xs, Fs, Xs, it = constrained_opt(f,g,x0)
-xs = util.col(xs) # make column vector
+# ##################################################
+# ## Solver
+# ##################################################
+# xs, Fs, Xs, it = constrained_opt(f,g,x0)
+# xs = util.col(xs) # make column vector
+
+W, Res = seek_am(M)
+
 ##################################################
 ## Results
 ##################################################
