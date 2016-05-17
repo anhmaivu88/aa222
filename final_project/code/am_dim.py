@@ -24,7 +24,7 @@ from seek_am import seek_am
 n       = int(1e2)  # monte carlo samples
 m       = 3         # Dimension of problem
 my_case = 0         # Problem selection
-my_base = 1         # Basis selection
+my_base = 0         # Basis selection
 
 # Define basis functions
 if my_base == 1:
@@ -71,34 +71,14 @@ for i in range(int(n)):
     M.append( [np.dot( dPhi[j](X[i]),grad(X[i]) ) for j in range(len(dPhi))] )
 M = np.array(M)
 
-# ##################################################
-# ## Optimization Problem
-# ##################################################
-
-# beta = 1.0      # tunable parameter
-# # Residual + L1
-# f = lambda x: norm(np.dot(M,np.array(x))) + beta * norm(x,ord=1)
-# # L2 >= 11
-# g = lambda x: (-1.0*norm(x,ord=2) + 1,)
-# # Initial guess
-# # x0 = [1.0] * M.shape[1]         # first orthant
-# x0 = random([1,M.shape[1]])     # random guess
-
-# ##################################################
-# ## Solver
-# ##################################################
-# xs, Fs, Xs, it = constrained_opt(f,g,x0)
-# xs = util.col(xs) # make column vector
-
+##################################################
+## Active Manifold Pursuit
+##################################################
 W, Res = seek_am(M)
 
 ##################################################
 ## Results
 ##################################################
 
-residual = norm(np.dot(M,np.array(xs)))
-print "Solver Results:"
-print "xs         = \n{}".format(xs)
-print "|M*xs|     = {}".format(residual)
-print "Feasible   = {}".format(feasible(g(xs)))
-print "iter       = {}".format(it)
+print "AM Results:"
+print "Residuals  = \n{}".format(Res)
