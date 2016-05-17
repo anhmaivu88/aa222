@@ -24,7 +24,7 @@ from seek_am import seek_am
 n       = int(1e2)  # monte carlo samples
 m       = 3         # Dimension of problem
 my_case = 0         # Problem selection
-my_base = 0         # Basis selection
+my_base = 1         # Basis selection
 
 # Define basis functions
 if my_base == 1:
