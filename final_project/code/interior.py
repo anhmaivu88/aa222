@@ -4,6 +4,7 @@ from scipy.optimize import fmin_bfgs
 
 # Custom libraries
 from barrier import log_barrier, inv_barrier, ext_obj
+from grad import grad
 
 # BFGS Call
 # res = fmin_bfgs(F,x0,fprime=dF,retall=True)
@@ -12,7 +13,7 @@ from barrier import log_barrier, inv_barrier, ext_obj
 def constrained_opt(F,G,x0,tol=1e-8):
     """ Constrained Optimization via interior point method
     Usage
-        xs, Fs, X, it = constrained_opt(F,G,x0)
+        xs, Fs, Gs, X, it = constrained_opt(F,G,x0)
     Arguments
         F       = objective function, R^n->R
         G       = leq constraints, R^n->R^k
@@ -22,6 +23,7 @@ def constrained_opt(F,G,x0,tol=1e-8):
     Outputs
         xs      = optimal point
         Fs      = optimal value
+        Gs      = gradient at optimal point
         X       = sequence of iterates
         it      = iterations
     """
@@ -49,7 +51,10 @@ def constrained_opt(F,G,x0,tol=1e-8):
         # Relax the barrier
         fcn = lambda x: F(x) + log_barrier(G(x))/r
         # Enforce a tighter convergence criterion
-        xn, Xn = fmin_bfgs(fcn,xs,retall=True,gtol=eps,epsilon=1e-8,disp=False)
+        # xn, Xn = fmin_bfgs(fcn,xs,retall=True,gtol=eps,epsilon=1e-8,disp=True)
+        res = fmin_bfgs(fcn,xs,retall=True,gtol=eps,epsilon=1e-8,full_output=True)
+        xn = res[0]; Xn = res[-1]
+        Gs = res[2]
         it = it + 1 # TODO -- grab iter count from bfgs
         X = np.append(X,Xn,axis=0)
         # Increment to next problem
@@ -66,4 +71,4 @@ def constrained_opt(F,G,x0,tol=1e-8):
 
     Fs = F(xs)
     ### Terminate
-    return xs, Fs, X, it
+    return xs, Fs, Gs, X, it
