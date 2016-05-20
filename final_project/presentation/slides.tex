@@ -54,21 +54,45 @@
 
 \begin{frame}
 \frametitle{The Curse of Dimensionality}
+\centering
+Understanding $f:\mathbb{R}^m\to\mathbb{R}$
 \img{curse_of_dimensionality}{Execution time scales exponentially with dimension.}
+Solution: Reduce $m$
 \end{frame}
 
 %-----------------------------------------------------
 
 \begin{frame}
 \frametitle{Active Subspaces}
-
+Find linear subspaces in the domain $\mathcal{D}\subseteq\mathbb{R}^m$ along which $f(\vx)$ does not change appreciably, and ignore those directions, roughly
+\begin{equation}
+\mW^T\nabla f(\vx) \approx 0, \text{ for all }\vx\in \mathcal{D}.\label{eq:nullspace}
+\end{equation}
+More details available in Reference \cite{p1}. New idea: Allow $\mW=\mW(\vx)$ to vary in parameter space.
 \end{frame}
 
 %-----------------------------------------------------
 
 \begin{frame}
 \frametitle{Active Manifolds}
+Approximate Equation $\ref{eq:nullspace}$ above at a set of sample points $\vx_i$. Parameterizing $\mW(\vx)$ on $\vsym{\alpha}$ in a linear fashion yields $\mM^T\vsym{\alpha}$. Add an L1 term for sparsity, and constrain to have a minimum L2 norm.
+\begin{equation}
+\begin{aligned}
+\text{min. }&\, \|\mM^T\vsym{\alpha}\|_2 + \beta\|\vsym{\alpha}\|_1 \\
+\text{s.t. }&\, \|\vsym{\alpha}\|_2 \geq 1.
+\end{aligned}
+\end{equation}
+Each $\vsym{\alpha}$ defines a manifold; we successively reparameterize to find orthogonal $\vsym{\alpha}$ until we fill the space.
+\end{frame}
 
+%-----------------------------------------------------
+
+\begin{frame}
+\begin{thebibliography}{99}
+\bibitem[Constantine, 2015]{p1} Paul Constantine (2015)
+\newblock Active Subspaces: Emerging Ideas for Dimension Reduction in Parameter Studies
+\newblock \emph{Publisher} SIAM Philadelphia
+\end{thebibliography}
 \end{frame}
 
 %-----------------------------------------------------
