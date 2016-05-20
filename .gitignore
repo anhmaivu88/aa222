@@ -111,7 +111,9 @@ ENV/
 *.maf
 *.mtc
 *.mtc1
+*.nav
 *.out
 *.synctex.gz
 *.fdb_latex
 *.fls
+*.snm
