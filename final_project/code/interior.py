@@ -4,7 +4,6 @@ from scipy.optimize import fmin_bfgs
 
 # Custom libraries
 from barrier import log_barrier, inv_barrier, ext_obj
-from grad import grad
 
 # BFGS Call
 # res = fmin_bfgs(F,x0,fprime=dF,retall=True)

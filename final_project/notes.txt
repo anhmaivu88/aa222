@@ -7,3 +7,25 @@ Prototype AM Optimization code
 - The process seems to (approximately) recover the expected bases, just as in the nullspace formulation!
     - But only when I include all the basis functions  (not just the linear ones), even for the ridge function -- this is very strange!
 
+--------------------------------------------------
+Tue May 17
+--------------------------------------------------
+
+L1 Maximization works, but does not have the intended effect
+- Basically throws all the manifolds together; we'd like to be able to separate them
+- Modified code to do progressive re-parameterization 
+    - Force all subsequent vectors to be orthogonal to the previous ones
+    - Done via a QR decomposition on A = [w_1,...,w_k,e_1,...,e_n],
+      where w_i are the previous vectors, and the e_i are the standard
+      basis
+
+Code seems to work well, but there are some issues
+- Sometimes, the solver will fail to find the global minimum
+
+Possible failure modes:
+- Solver is getting stuck in a local min (I think this is the case)
+    - Check the gradient at the solver output -- this should tell if the solver
+      thinks it is a local min
+- Some data sets generate a problem with a very poor solution
+    - I find this unlikely, as each test case has an exact solution;
+      it is always possible to make the residual identically zero
