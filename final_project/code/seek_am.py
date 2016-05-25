@@ -6,7 +6,7 @@ from numpy.linalg import norm
 import util
 from interior import constrained_opt
 
-def seek_am(M):
+def seek_am(M,x0=None):
     """Seeks the Active Manifolds by solving
     sequential constrained minimization problems
     Usage
@@ -36,8 +36,8 @@ def seek_am(M):
     F = f; G = g        # Unmodified for first run
     Qc = np.eye(m)      # First parameterization
     # Initial guess for solver
-    # x0 = [1.0] * m         # first orthant
-    x0 = random([1,m])     # random guess
+    if x0 == None:
+        x0 = [1.0] * m         # first orthant
 
     # Main loop
     for i in range(m):
