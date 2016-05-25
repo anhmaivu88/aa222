@@ -42,7 +42,7 @@ def seek_am(M):
     # Main loop
     for i in range(m):
         # Solve optimization problem
-        xs, Fs, Xs, it = constrained_opt(F,G,x0)
+        xs, Fs, Gs, X, it = constrained_opt(F,G,x0)
         w = util.col(Qc.dot(xs)) # map to physical space
         # Store results
         if W.shape==(0,):
