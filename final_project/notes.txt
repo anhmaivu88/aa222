@@ -29,3 +29,34 @@ Possible failure modes:
 - Some data sets generate a problem with a very poor solution
     - I find this unlikely, as each test case has an exact solution;
       it is always possible to make the residual identically zero
+
+--------------------------------------------------
+Wed May 25
+--------------------------------------------------
+
+Running some different cases
+- Scheme seems to be fairly dependent on number of MC samples
+	- 1e2 is good
+	- 1e1 seems to be 'not enough'
+
+Searching for an 'orthogonal' basis
+- Tried Legendre basis, with many terms, doesn't do well...
+- The polynomial basis with many terms also fails
+- Fewer basis functions seems to do better -- lower-dimensional problem
+
+What do we need for an 'orthogonal' basis?
+- Ideally, each basis function should contribute to the residual 'separately'
+- We can't demand that each manifold be pointwise orthogonal; this is
+  excluded by the linear basis
+- Can we get them to contribute 'separately' in some average sense?
+
+Could potentially recast problem as a convex problem
+- L2 + L1 on a half-space
+	- Would emphasize vectors in 1st orthant, which can be smaller
+
+Chatting with Gianluca
+- Make sure to use an orthogonal basis
+	- Like, an actually orthogonal basis
+- For the linear basis, make sure it always recovers AS
+- Use multiple IC's to debug the solver issues
+	- Different IC's go to different locations? Possibly local min thing
