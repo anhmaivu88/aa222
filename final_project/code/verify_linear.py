@@ -7,6 +7,7 @@ from ad.admath import log, sqrt
 from numpy.random import random
 from ad import gh
 import sys
+from scipy.linalg import svd
 
 import matplotlib
 # choose the backend to handle window geometry
@@ -86,18 +87,42 @@ for i in range(int(n)):
 M = np.array(M)
 
 ##################################################
+# Compute Active Subspace
+##################################################
+C = M.T.dot(M)
+U,L,V = svd(C)
+
+##################################################
 ## Run multiple pursuits
 ##################################################
 Err = []
+Dist = []
 W_hist = []
 for i in range(runs):
     x0 = random([1,m])
     W, Res = seek_am(M,x0=x0)
     Err.append(Res[0]+Res[1])
+    Dist.append( util.subspace_distance(util.col(U[:,1:]),util.col(W[:,0:2])) )
     W_hist.append(W)
+
+##################################################
+# Plot Results
+##################################################
 
 fig = plt.figure()
 plt.plot(Err,'*')
 plt.yscale('log')
+# Annotation
+plt.title("Residual Values")
+plt.xlabel("Run index")
+plt.ylabel("Residual")
+
+fig = plt.figure()
+plt.plot(Dist,'*')
+plt.yscale('log')
+# Annotation
+plt.title("Subspace Distances")
+plt.xlabel("Run index")
+plt.ylabel("Subspace Distance")
 
 plt.show()
