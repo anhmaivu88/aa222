@@ -9,6 +9,7 @@ from numpy import reshape
 from numpy import zeros, shape, nonzero
 from copy import copy
 from math import log
+from numpy import diag
 
 # Nullspace computation
 # from scipy.linalg import svd
@@ -96,6 +97,12 @@ def as_dim(Lam,eps=2.5):
     else:
         return G.index(gap)+1
 
+# Normalize the columns of a matrix
+# from numpy import diag
+def norm_col(M):
+    E = diag( [1/norm(M[:,i]) for i in range(M.shape[1])] )
+    return M.dot(E)
+
 # Rounds by smallest non-zero magnitude vector element
 # from numpy import zeros, shape, nonzero
 def round_out(M):
@@ -116,17 +123,22 @@ if __name__ == "__main__":
     # print(M)
 
     ### Test as_dim
-    Lam1 = [1,0.9] # Should be 2D
-    Lam2 = [1e3,1e1,0.5e1,1e0] # should be 1D
-    Lam3 = [1e3,0.9e3,1e1,1e0] # should be 2D
-    Lam4 = [1e3,0.9e3,0.8e3,1e0] # should be 3D
-    Lam5 = [1e3,0.9e3,0.8e3,0.7e3] # should be 4D
+    # Lam1 = [1,0.9] # Should be 2D
+    # Lam2 = [1e3,1e1,0.5e1,1e0] # should be 1D
+    # Lam3 = [1e3,0.9e3,1e1,1e0] # should be 2D
+    # Lam4 = [1e3,0.9e3,0.8e3,1e0] # should be 3D
+    # Lam5 = [1e3,0.9e3,0.8e3,0.7e3] # should be 4D
     
-    print("AS 1 dim={}".format(as_dim(Lam1)))
-    print("AS 2 dim={}".format(as_dim(Lam2)))
-    print("AS 3 dim={}".format(as_dim(Lam3)))
-    print("AS 4 dim={}".format(as_dim(Lam4)))
-    print("AS 5 dim={}".format(as_dim(Lam5)))
+    # print("AS 1 dim={}".format(as_dim(Lam1)))
+    # print("AS 2 dim={}".format(as_dim(Lam2)))
+    # print("AS 3 dim={}".format(as_dim(Lam3)))
+    # print("AS 4 dim={}".format(as_dim(Lam4)))
+    # print("AS 5 dim={}".format(as_dim(Lam5)))
 
     ### Test subspace_distance
     # M = np.
+
+    ### Test column normalization
+    M = np.reshape(np.arange(9),(3,3))
+    Mn= norm_col(M)
+    print( Mn )
