@@ -1,51 +1,6 @@
-% `advanced_example.tex', an advanced example employing the AIAA class
-% plus other third-party LaTeX packages.
-%
-% For a bare-bones usage, see `template.tex'.
-%
-% Typical processing for PostScript (PS) output:
-%
-%  latex advanced_example
-%  bibtex advanced_example  (bibliography)
-%  makeindex -s nomencl.ist -o advanced_example.gls advanced_example.glo
-%                            (nomenclature)
-%  latex advanced_example   (repeat as needed to resolve references)
-%
-%  xdvi advanced_example    (onscreen draft display)
-%  dvips advanced_example   (postscript)
-%  gv advanced_example.ps   (onscreen display)
-%  lpr advanced_example.ps  (hardcopy)
-%
-% With the above, only Encapsulated PostScript (EPS) images can be used.
-%
-% Typical processing for Portable Document Format (PDF) output:
-%
-%  pdflatex advanced_example
-%  bibtex advanced_example    (bibliography)
-%  makeindex -s nomencl.ist -o advanced_example.gls advanced_example.glo
-%                              (nomenclature)
-%  pdflatex advanced_example  (repeat as needed to resolve references)
-%
-%  acroread advanced_example.pdf  (onscreen display)
-%
-% If you have EPS figures, you will need to use the epstopdf script
-% to convert them to PDF because PDF is a limmited subset of EPS.
-% pdflatex accepts a variety of other image formats such as JPG, TIFF,
-% PNG, and so forth -- check the documentation for your version.
-%
-% If you do *not* specify suffixes when using the graphicx package's
-% \includegraphics command, latex and pdflatex will automatically select
-% the appropriate figure format from those available.  This allows you
-% to produce PS and PDF output from the same LaTeX source file.
-%
-% To generate a large format (e.g., 11"x17") PostScript copy for editing
-% purposes, use
-%
-%  dvips -x 1467 -O -0.65in,0.85in -t tabloid advanced_example
-%
-% For further details and support, read the Users Manual, aiaa.pdf.
-
 \documentclass[]{aiaa-tc}% insert '[draft]' option to show overfull boxes
+
+\input{../zachs_macros}
 
  \usepackage{varioref}%  smart page, figure, table, and equation referencing
  \usepackage{wrapfig}%   wrap figures/tables in text (i.e., Di Vinci style)
@@ -82,8 +37,6 @@
  \newcommand{\file}[1]{\texttt{#1}}
  \newcommand{\BibTeX}{\textsc{Bib}\TeX}
 
-\input{../zachs_macros}
-
 \begin{document}
 
 \maketitle
@@ -118,7 +71,14 @@ This paragraph should briefly introduce the idea of Active Manifolds.
 
 \section{Seeking Active Manifolds}
 
-
+\begin{equation}
+  \label{eq:inactive_manifold}
+  \mW(\vx)^T \nabla f(\vx) = 0
+\end{equation}%
+\nomenclature{$\vx$}{Input vector}%
+\nomenclature{$f(\vx)$}{Scalar quantity of interest}%
+\nomenclature{$\nabla f(\vx)$}{Gradient of QoI}%
+\nomenclature{$\mW(\vx)$}{Manifold vector}%
 
 \section{Conclusion}
 
