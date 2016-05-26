@@ -1,0 +1,136 @@
+% `advanced_example.tex', an advanced example employing the AIAA class
+% plus other third-party LaTeX packages.
+%
+% For a bare-bones usage, see `template.tex'.
+%
+% Typical processing for PostScript (PS) output:
+%
+%  latex advanced_example
+%  bibtex advanced_example  (bibliography)
+%  makeindex -s nomencl.ist -o advanced_example.gls advanced_example.glo
+%                            (nomenclature)
+%  latex advanced_example   (repeat as needed to resolve references)
+%
+%  xdvi advanced_example    (onscreen draft display)
+%  dvips advanced_example   (postscript)
+%  gv advanced_example.ps   (onscreen display)
+%  lpr advanced_example.ps  (hardcopy)
+%
+% With the above, only Encapsulated PostScript (EPS) images can be used.
+%
+% Typical processing for Portable Document Format (PDF) output:
+%
+%  pdflatex advanced_example
+%  bibtex advanced_example    (bibliography)
+%  makeindex -s nomencl.ist -o advanced_example.gls advanced_example.glo
+%                              (nomenclature)
+%  pdflatex advanced_example  (repeat as needed to resolve references)
+%
+%  acroread advanced_example.pdf  (onscreen display)
+%
+% If you have EPS figures, you will need to use the epstopdf script
+% to convert them to PDF because PDF is a limmited subset of EPS.
+% pdflatex accepts a variety of other image formats such as JPG, TIFF,
+% PNG, and so forth -- check the documentation for your version.
+%
+% If you do *not* specify suffixes when using the graphicx package's
+% \includegraphics command, latex and pdflatex will automatically select
+% the appropriate figure format from those available.  This allows you
+% to produce PS and PDF output from the same LaTeX source file.
+%
+% To generate a large format (e.g., 11"x17") PostScript copy for editing
+% purposes, use
+%
+%  dvips -x 1467 -O -0.65in,0.85in -t tabloid advanced_example
+%
+% For further details and support, read the Users Manual, aiaa.pdf.
+
+\documentclass[]{aiaa-tc}% insert '[draft]' option to show overfull boxes
+
+ \usepackage{varioref}%  smart page, figure, table, and equation referencing
+ \usepackage{wrapfig}%   wrap figures/tables in text (i.e., Di Vinci style)
+ \usepackage{threeparttable}% tables with footnotes
+ \usepackage{dcolumn}%   decimal-aligned tabular math columns
+  \newcolumntype{d}{D{.}{.}{-1}}
+ \usepackage{nomencl}%   nomenclature generation via makeindex
+  \makenomenclature
+ \usepackage{subfigure}% subcaptions for subfigures
+ \usepackage{subfigmat}% matrices of similar subfigures, aka small mulitples
+ \usepackage{fancyvrb}%  extended verbatim environments
+  \fvset{fontsize=\footnotesize,xleftmargin=2em}
+ \usepackage{lettrine}%  dropped capital letter at beginning of paragraph
+ % \usepackage[dvips]{dropping}% alternative dropped capital package
+ \usepackage[colorlinks]{hyperref}%  hyperlinks [must be loaded after dropping]
+
+ \title{Pursuing Active Manifolds via Nonlinear Optimization}
+
+ \author{
+  Zachary R. del Rosario\thanks{Job Title, Department, Address, and AIAA Member Grade.}\\
+  {\normalsize\itshape
+   Stanford University, Stanford, CA, 94305, USA}\\
+ }
+
+ % Data used by 'handcarry' option
+ % \AIAApapernumber{YEAR-NUMBER}
+ % \AIAAconference{Conference Name, Date, and Location}
+ % \AIAAcopyright{\AIAAcopyrightD{YEAR}}
+
+ % Define commands to assure consistent treatment throughout document
+ \newcommand{\eqnref}[1]{(\ref{#1})}
+ \newcommand{\class}[1]{\texttt{#1}}
+ \newcommand{\package}[1]{\texttt{#1}}
+ \newcommand{\file}[1]{\texttt{#1}}
+ \newcommand{\BibTeX}{\textsc{Bib}\TeX}
+
+\input{../zachs_macros}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Abstract
+\end{abstract}
+
+\printnomenclature % creates nomenclature section produced by MakeIndex
+
+\section{Introduction}
+
+\lettrine[nindent=0pt]{T}{his} paragraph should be a `soft introduction'. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris eu vehicula diam, quis tempus nunc. Nunc rutrum leo vitae placerat lacinia. Nulla sodales, sem quis imperdiet dictum, felis ante iaculis erat, vel tincidunt odio urna eget erat. Sed eu faucibus neque, tempus porttitor augue.
+
+\begin{wrapfigure}{R}{0.5\linewidth}
+ \includegraphics{../images/curse_of_dimensionality}
+ \caption{The execution time of many studies increases exponentially with the dimensionality of parameter space.}
+ \label{fig:dimensionality}
+\end{wrapfigure}
+
+This paragraph should introduce the Curse of Dimensionality; the motivation behind Dimension Reduction. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris eu vehicula diam, quis tempus nunc. Nunc rutrum leo vitae placerat lacinia. Nulla sodales, sem quis imperdiet dictum, felis ante iaculis erat, vel tincidunt odio urna eget erat. Sed eu faucibus neque, tempus porttitor augue. Fusce nec semper lectus, a varius est. Fusce ultricies euismod enim vel porta. Suspendisse accumsan, libero dignissim consectetur eleifend, nulla ligula dictum tellus, sit amet placerat risus diam in ipsum. Donec leo turpis, porta sit amet ipsum sit amet, mattis varius ipsum. Praesent ac ante aliquet, lacinia nulla in, interdum nunc. Curabitur dictum porta ipsum, at egestas libero blandit vitae. Sed tristique viverra erat. Ut mauris eros, bibendum sed massa vel, congue dignissim tortor. Interdum et malesuada fames ac ante ipsum primis in faucibus. Nullam consectetur sed sapien sed sollicitudin. Curabitur et justo a dolor pulvinar tincidunt non ac lacus. 
+
+\begin{wrapfigure}{L}{0.5\linewidth}
+ \includegraphics{../images/surface_plot}
+ \caption{Example of Active Subspaces.}
+ \label{fig:as_example}
+\end{wrapfigure}
+
+This paragraph should introduce Active Subspaces, give an example of its use, and discuss some limitations. \cite{constantine2015} Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris eu vehicula diam, quis tempus nunc. Nunc rutrum leo vitae placerat lacinia. Nulla sodales, sem quis imperdiet dictum, felis ante iaculis erat, vel tincidunt odio urna eget erat. Sed eu faucibus neque, tempus porttitor augue. Fusce nec semper lectus, a varius est. Fusce ultricies euismod enim vel porta. Suspendisse accumsan, libero dignissim consectetur eleifend, nulla ligula dictum tellus, sit amet placerat risus diam in ipsum. Donec leo turpis, porta sit amet ipsum sit amet, mattis varius ipsum. Praesent ac ante aliquet, lacinia nulla in, interdum nunc. Curabitur dictum porta ipsum, at egestas libero blandit vitae. Sed tristique viverra erat. Ut mauris eros, bibendum sed massa vel, congue dignissim tortor. Interdum et malesuada fames ac ante ipsum primis in faucibus. Nullam consectetur sed sapien sed sollicitudin. Curabitur et justo a dolor pulvinar tincidunt non ac lacus.
+
+This paragraph should briefly introduce the idea of Active Manifolds.
+
+\section{Seeking Active Manifolds}
+
+
+
+\section{Conclusion}
+
+This had been a brief example of some of the more advanced options
+available for \LaTeX.
+Please see the documentation for each package for extended discussion or
+usage.
+
+% produces the bibliography section when processed by BibTeX
+\bibliography{bibtex_database}
+\bibliographystyle{aiaa}
+
+\end{document}
+
+% - Release $Name:  $ -
