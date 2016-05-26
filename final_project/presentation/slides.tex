@@ -57,43 +57,49 @@
 \centering
 Understanding $f:\mathbb{R}^m\to\mathbb{R}$
 \img{curse_of_dimensionality}{Execution time scales exponentially with dimension.}
-Solution: Reduce $m$
+Solution: Reduce $m$ -- \emph{Dimension Reduction}
 \end{frame}
 
 %-----------------------------------------------------
 
 \begin{frame}
 \frametitle{Active Subspaces}
-Find linear subspaces in the domain $\mathcal{D}\subseteq\mathbb{R}^m$ along which $f(\vx)$ does not change appreciably, and ignore those directions, roughly
+Find linear subspaces in the domain $\mathcal{D}\subseteq\mathbb{R}^m$ along which 
+
+\bigskip
 \begin{equation}
 \mW^T\nabla f(\vx) \approx 0, \text{ for all }\vx\in \mathcal{D}.\label{eq:nullspace}
 \end{equation}
-More details available in Reference \cite{p1}. New idea: Allow $\mW=\mW(\vx)$ to vary in parameter space.
+
+\bigskip
+More details available in Reference \cite{p1}.
 \end{frame}
 
 %-----------------------------------------------------
 
 \begin{frame}
 \frametitle{Active Manifolds}
-Approximate Equation $\ref{eq:nullspace}$ above at a set of sample points $\vx_i$. Parameterizing $\mW(\vx)$ on $\vsym{\alpha}$ in a linear fashion yields $\mM^T\vsym{\alpha}$. Add an L1 term for sparsity, and constrain to have a minimum L2 norm.
+New idea: Allow $\mW=\mW(\vx)$ to vary in parameter space.
+
+\bigskip
+Approximate Equation $\ref{eq:nullspace}$ above at a set of sample points $\vx_i$.
+
+\bigskip
 \begin{equation}
 \begin{aligned}
 \text{min. }&\, \|\mM^T\vsym{\alpha}\|_2 + \beta\|\vsym{\alpha}\|_1 \\
 \text{s.t. }&\, \|\vsym{\alpha}\|_2 \geq 1.
 \end{aligned}
 \end{equation}
-Each $\vsym{\alpha}$ defines a manifold; we successively reparameterize to find orthogonal $\vsym{\alpha}$ until we fill the space.
+Each $\vsym{\alpha}^*_k$ defines a manifold; we successively reparameterize to find orthogonal $\vsym{\alpha}^*_k$ until we fill the space.
 \end{frame}
 
 %-----------------------------------------------------
 
 \begin{frame}
 \frametitle{Early Results}
-\begin{itemize}
-\item Can recover Active Subspaces
-\item Can recover exact Active Manifold cases
-\item Solver sometimes gets `stuck'
-\end{itemize}
+\[f(\vx) = \frac{1}{2}(0.3x_1+0.3x_2+0.7x_3)^2\]
+\imgtwo{residuals_as}{vectors_as}{Residuals}{Vectors}
 \end{frame}
 
 %-----------------------------------------------------
