@@ -59,4 +59,4 @@ def seek_am(M,x0=None):
             G = lambda alpha: g(Qc.dot(util.col(np.array(alpha))))
             x0 = random([1,Qc.shape[1]])     # random guess
 
-    return W, Res
+    return util.norm_col(W), Res
