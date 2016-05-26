@@ -64,15 +64,29 @@ Solution: Reduce $m$ -- \emph{Dimension Reduction}
 
 \begin{frame}
 \frametitle{Active Subspaces}
-Find linear subspaces in the domain $\mathcal{D}\subseteq\mathbb{R}^m$ along which 
-
-\bigskip
-\begin{equation}
-\mW^T\nabla f(\vx) \approx 0, \text{ for all }\vx\in \mathcal{D}.\label{eq:nullspace}
-\end{equation}
-
+\centering Consider $f(\vx) = \frac{1}{2}(.7x_1+.3x_2)^2$
+\img{surface_plot}{Active Subspace vectors over surface plot of $f$.}
 \bigskip
 More details available in Reference \cite{p1}.
+\end{frame}
+
+
+%-----------------------------------------------------
+
+\begin{frame}
+\frametitle{Early Results}
+\[f(\vx) = x + y - 2z^2\]
+\img{vectors_am}{Vector components}
+\end{frame}
+
+%-----------------------------------------------------
+
+\begin{frame}
+\begin{thebibliography}{99}
+\bibitem[Constantine, 2015]{p1} Paul Constantine (2015)
+\newblock Active Subspaces: Emerging Ideas for Dimension Reduction in Parameter Studies
+\newblock \emph{Publisher} SIAM Philadelphia
+\end{thebibliography}
 \end{frame}
 
 %-----------------------------------------------------
@@ -92,24 +106,6 @@ Approximate Equation $\ref{eq:nullspace}$ above at a set of sample points $\vx_i
 \end{aligned}
 \end{equation}
 Each $\vsym{\alpha}^*_k$ defines a manifold; we successively reparameterize to find orthogonal $\vsym{\alpha}^*_k$ until we fill the space.
-\end{frame}
-
-%-----------------------------------------------------
-
-\begin{frame}
-\frametitle{Early Results}
-\[f(\vx) = \frac{1}{2}(0.3x_1+0.3x_2+0.7x_3)^2\]
-\imgtwo{residuals_as}{vectors_as}{Residuals}{Vectors}
-\end{frame}
-
-%-----------------------------------------------------
-
-\begin{frame}
-\begin{thebibliography}{99}
-\bibitem[Constantine, 2015]{p1} Paul Constantine (2015)
-\newblock Active Subspaces: Emerging Ideas for Dimension Reduction in Parameter Studies
-\newblock \emph{Publisher} SIAM Philadelphia
-\end{thebibliography}
 \end{frame}
 
 %-----------------------------------------------------

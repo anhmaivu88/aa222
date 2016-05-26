@@ -1,6 +1,10 @@
 % Zach del Rosario's LaTeX macros, May 2016
 % Inspired by Paul Constantine's macros
 
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption}
+
 % Image Macro: \img{filename}{caption}
 \newcommand{\img}[2]{
 	\begin{figure}[H]
@@ -9,6 +13,25 @@
 	\caption{#2}                  % second argument is caption
 	\label{fig:#1}                % generate label from first argument
 	\end{figure} }
+
+% Double Image Macro: \img{file1}{file2}{caption1}{caption2}
+\newcommand{\imgtwo}[4]{
+	\begin{figure}
+	\centering
+	\begin{minipage}{.5\textwidth}
+		\centering
+		\includegraphics[width=0.9\linewidth]{../images/#1}
+		\captionof{figure}{#3}
+		\label{fig:#1}
+	\end{minipage}%
+	\begin{minipage}{.5\textwidth}
+		\centering
+		\includegraphics[width=0.9\linewidth]{../images/#2}
+		\captionof{figure}{#4}
+		\label{fig:#2}
+	\end{minipage}
+	\end{figure}
+}
 
 % Table Macro: \tab{filename}{caption}
 \newcommand{\tab}[2]{
