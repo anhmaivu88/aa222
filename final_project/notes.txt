@@ -31,13 +31,13 @@ Possible failure modes:
       it is always possible to make the residual identically zero
 
 --------------------------------------------------
-Wed May 25
+Wed May 25 2016
 --------------------------------------------------
 
 Running some different cases
 - Scheme seems to be fairly dependent on number of MC samples
-	- 1e2 is good
-	- 1e1 seems to be 'not enough'
+  - 1e2 is good
+  - 1e1 seems to be 'not enough'
 
 Searching for an 'orthogonal' basis
 - Tried Legendre basis, with many terms, doesn't do well...
@@ -52,11 +52,25 @@ What do we need for an 'orthogonal' basis?
 
 Could potentially recast problem as a convex problem
 - L2 + L1 on a half-space
-	- Would emphasize vectors in 1st orthant, which can be smaller
+  - Would emphasize vectors in 1st orthant, which can be smaller
 
 Chatting with Gianluca
 - Make sure to use an orthogonal basis
-	- Like, an actually orthogonal basis
+  - Like, an actually orthogonal basis
 - For the linear basis, make sure it always recovers AS
 - Use multiple IC's to debug the solver issues
-	- Different IC's go to different locations? Possibly local min thing
+  - Different IC's go to different locations? Possibly local min thing
+
+--------------------------------------------------
+Thu May 26 2016
+--------------------------------------------------
+
+Further studies with the linear AS verification code
+- Subspace distance and residual seem to be connected!
+  - They live between different ranges, but follow the same trend
+  - Perhaps this relationship can be made formal, in the case of linear Active Subspaces
+  - BUT: I've only looked at Ridge Functions -- here an exact AS exists
+
+Trying a Least Squares formulation
+- Seems to work well on a ridge function with the linear basis
+- Gives dense vector for 'larger' basis
