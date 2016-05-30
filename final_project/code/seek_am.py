@@ -37,7 +37,8 @@ def seek_am(M,x0=None):
     Qc = np.eye(m)      # First parameterization
     # Initial guess for solver
     if x0 == None:
-        x0 = [1.0] * m         # first orthant
+        # x0 = [1.0] * m         # first orthant
+        x0 = random([1,Qc.shape[1]])     # random guess
 
     # Main loop
     for i in range(m):

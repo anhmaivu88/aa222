@@ -29,6 +29,8 @@ from seek_am import seek_am
 # Parameters
 n       = int(1e2)  # monte carlo samples
 m       = 3         # Dimension of problem
+res_t   = 1e-3      # Absolute tolerance for residual
+iter_max= 10        # Maximum restarts for solver
 # Plot settings
 offset = [(0,500),(700,500)] # Plot window locations
 
@@ -65,15 +67,15 @@ if my_base == 1:
             lambda x: log(abs(x[0])),
             lambda x: log(abs(x[1])),
             lambda x: log(abs(x[2]))]
-    Labels = ["x_1",
-              "x_2",
-              "x_3",
-              "x_1^2",
-              "x_2^2",
-              "x_3^2",
-              "log(|x_1|)",
-              "log(|x_2|)",
-              "log(|x_3|)"]
+    Labels = ["X_1",
+              "Y_1",
+              "Z_1",
+              "X_2",
+              "Y_2",
+              "Z_2",
+              "X_3",
+              "Y_3",
+              "Z_3"]
 elif my_base == 2:
     # Third Order
     Phi = [ lambda x: x[0],
@@ -147,7 +149,19 @@ M = np.array(M)
 ##################################################
 ## Active Manifold Pursuit
 ##################################################
-W, Res = seek_am(M)
+res = res_t * 2
+it  = 0
+while (res > res_t) and (it < iter_max):
+  # Printback
+  if it == 0:
+    print("Initial guess...")
+  else:
+    print("Restarting with new guess...")
+  # Random initial guess
+  W, Res = seek_am(M)
+  # Update loop variables
+  res = max(Res[:m-1])
+  it += 1
 
 ##################################################
 ## Results
@@ -155,7 +169,8 @@ W, Res = seek_am(M)
 
 # Command line printback
 print "AM Results:"
-print "Residuals  = \n{}".format(Res)
+print "Solver runs = {}".format(it)
+print "Residuals   = \n{}".format(Res)
 print "Leading Vectors:"
 print "W[:,0] = \n{}".format(W[:,0])
 print "W[:,1] = \n{}".format(W[:,1])
