@@ -6,18 +6,29 @@ from numpy.linalg import norm
 import util
 from interior import constrained_opt
 
-def seek_am(M,x0=None):
+def seek_am(M,reset_max=50,res_thresh=1e-3,verbose=False,full=False,\
+            m_des=None):
     """Seeks the Active Manifolds by solving
     sequential constrained minimization problems
     Usage
         W,Res = seek_am(M)
+        W,Res,it = seek_am(M,full=True)
     Arguments
         M = matrix defining problem
+    Keyword Arguments
+        reset_max  = maximum number of resets
+        res_thresh = absolute residual tolerance
+        verbose    = verbose (terminal) output
+        full       = full function return
+        m_des      = desired number of manifolds
     Outputs
-        W   = orthogonal matrix
-        Res = list of residual values
+        W       = orthogonal matrix
+        Res     = list of residual values
+        resets  = number of resets
     """
     m = M.shape[1]
+    if m_des == None:
+        m_des = m
     ##################################################
     ## Optimization Problem
     ##################################################
@@ -36,28 +47,45 @@ def seek_am(M,x0=None):
     F = f; G = g        # Unmodified for first run
     Qc = np.eye(m)      # First parameterization
     # Initial guess for solver
-    if x0 == None:
-        # x0 = [1.0] * m         # first orthant
-        x0 = random([1,Qc.shape[1]])     # random guess
+    x0 = random([1,Qc.shape[1]])     # random guess
 
     # Main loop
-    for i in range(m):
+    resets = 0
+    i = 0
+
+    # for i in range(m):
+    while i < m_des:
         # Solve optimization problem
         xs, Fs, Gs, X, it = constrained_opt(F,G,x0)
         w = util.col(Qc.dot(xs)) # map to physical space
-        # Store results
-        if W.shape==(0,):
-            W = w
+        res = norm(np.dot(M,w))
+        # Continue if solution meets residual tolerance,
+        # or we're out of reset budget
+        if (res < res_thresh) or (resets >= reset_max):
+            # Store results
+            if W.shape==(0,):
+                W = w
+            else:
+                W = np.append(W,w,axis=1)
+            Res.append( res )
+            # Reparameterize
+            if (i < m-1): # Check if last iteration
+                A = np.append(np.array(W),np.eye(m),axis=1)
+                Q,R = qr(A,mode='economic')
+                Qc = util.col(Q[:,i+1:])
+                F = lambda alpha: f(Qc.dot(util.col(np.array(alpha))))
+                G = lambda alpha: g(Qc.dot(util.col(np.array(alpha))))
+            # Iterate
+            i += 1
+        # Iterate the reset budget
         else:
-            W = np.append(W,w,axis=1)
-        Res.append( norm(np.dot(M,w)) )
-        # Reparameterize if continuing
-        if (i < m-1):
-            A = np.append(np.array(W),np.eye(m),axis=1)
-            Q,R = qr(A,mode='economic')
-            Qc = util.col(Q[:,i+1:])
-            F = lambda alpha: f(Qc.dot(util.col(np.array(alpha))))
-            G = lambda alpha: g(Qc.dot(util.col(np.array(alpha))))
-            x0 = random([1,Qc.shape[1]])     # random guess
+            resets += 1
+            if verbose:
+                print("Residual tolerance not reached, solver stage reset...")
+        # New initial guess
+        x0 = random([1,Qc.shape[1]])     # random guess
 
-    return util.norm_col(W), Res
+    if full:
+        return util.norm_col(W), Res, resets
+    else:
+        return util.norm_col(W), Res

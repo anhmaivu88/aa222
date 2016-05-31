@@ -29,6 +29,7 @@ from seek_am import seek_am
 # Parameters
 n       = int(1e2)  # monte carlo samples
 m       = 3         # Dimension of problem
+m_des   = 2         # Desired manifolds
 res_t   = 1e-3      # Absolute tolerance for residual
 iter_max= 10        # Maximum restarts for solver
 # Plot settings
@@ -149,19 +150,8 @@ M = np.array(M)
 ##################################################
 ## Active Manifold Pursuit
 ##################################################
-res = res_t * 2
-it  = 0
-while (res > res_t) and (it < iter_max):
-  # Printback
-  if it == 0:
-    print("Initial guess...")
-  else:
-    print("Restarting with new guess...")
-  # Random initial guess
-  W, Res = seek_am(M)
-  # Update loop variables
-  res = max(Res[:m-1])
-  it += 1
+W, Res, it = seek_am(M, res_thresh = res_t, verbose=True, full=True, \
+                    m_des = m_des)
 
 ##################################################
 ## Results
@@ -169,12 +159,11 @@ while (res > res_t) and (it < iter_max):
 
 # Command line printback
 print "AM Results:"
-print "Solver runs = {}".format(it)
-print "Residuals   = \n{}".format(Res)
+print "Solver resets = {}".format(it)
+print "Residuals     = \n{}".format(Res)
 print "Leading Vectors:"
-print "W[:,0] = \n{}".format(W[:,0])
-print "W[:,1] = \n{}".format(W[:,1])
-print "W[:,2] = \n{}".format(W[:,2])
+for i in range(m_des):
+    print "W[:,"+str(i)+"] = \n{}".format(W[:,i])
 
 ##################################################
 # Plotting
