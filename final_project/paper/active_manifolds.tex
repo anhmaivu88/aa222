@@ -37,6 +37,9 @@
  \newcommand{\file}[1]{\texttt{#1}}
  \newcommand{\BibTeX}{\textsc{Bib}\TeX}
 
+ % Define document-specific shortcuts
+ \newcommand{\dom}{\mathcal{D}}
+
 \begin{document}
 
 \maketitle
@@ -48,10 +51,11 @@ Abstract
 \printnomenclature % creates nomenclature section produced by MakeIndex
 
 %-------------------------------------------------
-\section{Introduction}
+\section{Introduction} \label{sec:introduction}
 %-------------------------------------------------
 
-\lettrine[nindent=0pt]{O}{ne} of the most challenging difficulties facing high-fidelity modeling is the treatment of high-dimensional parameter spaces: the Curse of Dimensionality. Consider a parameter study on some quantity of interest (QoI) $f$ in a space of dimension $m$; a simple heuristic is to use $10$ points per dimension, in order to well represent the parameter space. Then the total number of sample points is $10^m$. If a computer code implementing our model executes in a fixed time of $1$ second, then our parameter study execution time scales exponentially. Figure \ref{fig:curse_of_dimensionality} depicts the aforementioned scenario.
+\lettrine[nindent=0pt]{O}{ne} of the most challenging difficulties facing high-fidelity modeling is the treatment of high-dimensional parameter spaces: the Curse of Dimensionality. Consider a parameter study on some quantity of interest (QoI) $f$ in a space $\dom\subseteq\mathbb{R}^m$; a simple heuristic is to use $10$ points per dimension, in order to well represent the parameter space. Then the total number of sample points is $10^m$. If a computer code implementing our model executes in a fixed time of $1$ second, then our parameter study execution time scales exponentially. Figure \ref{fig:curse_of_dimensionality} depicts the aforementioned scenario.
+\nomenclature{$\dom$}{Domain of $f$}%
 
 \begin{wrapfigure}{R}{0.5\linewidth}
  \includegraphics{../images/curse_of_dimensionality}
@@ -62,42 +66,138 @@ Abstract
 The only reasonable strategy to mitigate this challenge is to perform \emph{dimension reduction}, that is, to reduce $m$. One scheme for dimension reduction of this sort is to seek \emph{Active Subspaces} -- linear subspaces in parameter space along which the majority of variation in our QoI is captured. \cite{constantine2015} The Active Subspaces approach gives a `perfect' dimension reduction in the case that our QoI is a Ridge Function; that is, for $\vx\in\mathbb{R}^m$ and $\mA\in\mathbb{R}^{m\times k}$ with $k<m$, we have $f(\vx)=g(\mA^T\vx)$. Note that a Ridge Function is constant along directions which are orthogonal to $\mA$, that is
 
 \begin{equation}
-\mW^T\nabla f = 0,\text{ for } \mW^TA = 0. \label{eq:ridge_property}
+\mW^T\nabla f = 0 \logeq \mW^TA = 0, \label{eq:ridge_property}
 \end{equation}
 
 \begin{wrapfigure}{R}{1.0\linewidth}
  \includegraphics{../images/surface_plot}
- \caption{Active and Inactive directions for example function. Note that on average, the function changes more along the active directions than the inactive directions; in this case, the change in the inactive direction is exactly zero.}
+ \caption{Note that on average, the function changes more along the active directions than the inactive directions; in this case, the change in the inactive direction is exactly zero.}
  \label{fig:as_example}
 \end{wrapfigure}
 
-One example of a Ridge Function is $f(\vx) = \frac{1}{2}(.7x_1+.3x_2)^2$. In this case, the Active Subspace approach discovers the Active and Inactive directions, depicted in Figure \ref{fig:as_example}. Note that this gives us a `perfect' dimension reduction, as we can completely neglect changes along the direction $[-.3,.7]^T$. Such Ridge Functions may seem like a contrivance, but they are actually quite common in multivariate Fourier Transforms\cite{pinkus2015} and physical laws in general.\cite{Constantine2016} Nevertheless, Ridge Functions are not the only functional form that arises in practice; while approximate Active Subspaces are useful, it is easy to construct functions which do not admit this sort of low-dimensional structure.
+where $\nabla f$ is the gradient of $f$, understood to be a column vector. One example of a Ridge Function is $f(\vx) = \frac{1}{2}(.7x_1+.3x_2)^2$. In this case, the Active Subspace approach discovers the Active and Inactive directions, depicted in Figure \ref{fig:as_example}. Note that this gives us a `perfect' dimension reduction, as we can completely neglect changes along the direction $[-.3,.7]^T$. Such Ridge Functions may seem like a contrivance, but they are actually quite common in multivariate Fourier Transforms\cite{pinkus2015} and physical laws in general.\cite{Constantine2016} Nevertheless, Ridge Functions are not the only functional form that arises in practice; in this case the Active Subspace is approximate. While approximate Active Subspaces are useful, it is easy to construct functions which do not admit this sort of low-dimensional structure.
 
-A natural generalization of Active Subspaces is to seek \emph{Active Manifolds}; that is curved subsets of parameter space which capture the variability of a function. Such low-dimensional structures should recover linear subspaces in the case that they exist (i.e. a Ridge Function), and more general spaces when they do not. Note that if a function is differentiable, we can always move along the gradient to capture the full variability of a function -- unfortunately this requires perfect knowledge of the function, which brings us back to the Curse of Dimensionality. In practice we must use a limited number of gradient samples (assumed to be available, say through an adjoint solution\cite{Jameson1988} or automatic differentiation\cite{Rall1981}) to numerically approximate such a manifold.
+A natural generalization of Active Subspaces is to seek \emph{Active Manifolds}; that is, curved subsets of parameter space which capture the variability of a function. Such low-dimensional structures should recover linear subspaces in the case that they exist (i.e. a Ridge Function), and more general spaces when they do not. Note that if a function is differentiable, we can always move along the gradient to capture the full variability of a function -- unfortunately this requires perfect knowledge of the function, which brings us back to the Curse of Dimensionality. In practice we must use a limited number of gradient samples (assumed to be available, say through an adjoint solution\cite{Jameson1988} or automatic differentiation\cite{Rall1981}) to numerically approximate such a manifold.
+
+In this work, we focus on the \emph{identification} of Active Manifolds, and leave their usage to subsequent works. The re-parameterization of a function on an Active Subspace is already laden with important considerations, which is further complicated by generalization to more arbitrary spaces. These are important issues which lie outside the scope of this document.
 
 %-------------------------------------------------
-\section{Seeking Active Manifolds}
+\section{Seeking Active Manifolds} \label{sec:active_manifolds}
 %-------------------------------------------------
 The strategy we will adopt in this work is to generalize the properties of a Ridge Function: By allowing Equation \ref{eq:ridge_property} to vary in space, we arrive at
 
 \begin{equation}
   \label{eq:inactive_manifold}
-  \mW(\vx)^T \nabla f(\vx) = 0
+  \mW(\vx)^T \nabla f(\vx) = 0.
 \end{equation}%
 \nomenclature{$\vx$}{Input vector}%
 \nomenclature{$f(\vx)$}{Scalar quantity of interest}%
 \nomenclature{$\nabla f(\vx)$}{Gradient of QoI}%
-\nomenclature{$\mW(\vx)$}{Manifold vector}%
+\nomenclature{$\mW(\vx)$}{Manifold matrix}%
+
+Equation \ref{eq:inactive_manifold} gives us a set of directions $\mW(\vx)$ along which $f(\vx)$ does not vary -- these directions define \emph{Inactive Manifolds}, while the orthogonal directions define \emph{Active Manifolds}. Note that as long as $f(\vx)$ is differentiable, we know $\mW(\vx)$ exists, as we can simply perform a QR decomposition on the $m\times m$ identity matrix, augmented with $\nabla f$. While this is mathematically possible, such a scheme is computationally intractable due to being an infinite dimensional problem. Instead, we must settle on a finite dimensional problem by approximating Equation \ref{eq:inactive_manifold}.
+
+First, we will consider a single direction $\vw_j(\vx)$, and parameterize on a finite number of basis functions. Choose a set of $k$ differentiable functions $\phi_i:\mathbb{R}^m\to\mathbb{R}$, and set
+
+\begin{equation}
+\label{eq:parameterized_w}
+\vw_j(\vx) = \sum_{i=1}^k \alpha_{ij}\nabla\phi_i(\vx),
+\end{equation}
+\nomenclature{$\vw_j(\vx)$}{Manifold vector}%
+\nomenclature{$\vsym{\alpha}_j$}{Manifold parameter vector}%
+\nomenclature{$\phi_i$}{Manifold basis function}%
+
+where the $\alpha_{ij}$ parameterize $\vw_j(\vx)$ in a linear fashion. Now we construct $\mW(\vx)$ from a collection of these $\vw_j(\vx)$, each parameterized on a different $\vsym{\alpha}_j$ vector, that is
+
+\begin{equation}
+\mW(\vx) = [\vw_1(\vx),\dots,\vw_l(\vx)].
+\end{equation}
+
+Rather than attempt to solve for $\mW$ all at once, we will attempt to enforce Equation \ref{eq:inactive_manifold} for each $\vw_j(\vx)$ individually. We must make two concessions though. First, even though the $\vw_j$ are now parameterized on a finite set, Equation \ref{eq:inactive_manifold} is enforced at all points $\vx\in\dom$: In practice we must sample a number of points $\{\vx_i\}_{i=1}^n\subseteq\dom$ and enforce $\vw_j^T(\vx_i)\nabla f(\vx_i)=0$ on this set. Second, unless $\mW$ lies precisely within the span of the $\nabla\phi_i$, Equation \ref{eq:inactive_manifold} will hold only approximately: In practice we will attempt to minimize the residual, defined by
+
+\begin{equation}
+\label{eq:residual}
+R = \|\mM\vsym{\alpha}\|_2,
+\end{equation}
+
+where
+
+\begin{equation}
+\label{eq:matrix_m}
+\mM = \left[\begin{array}{ccc}%
+    \nabla\phi_1^T(\vx_1)\nabla f(\vx_1) & \cdots & \nabla\phi_k^T(\vx_1)\nabla f(\vx_1) \\
+    \vdots & \ddots & \vdots \\
+    \nabla\phi_1^T(\vx_n)\nabla f(\vx_n) & \cdots & \nabla\phi_k^T(\vx_n)\nabla f(\vx_n) \\
+    \end{array}\right].
+\end{equation}
+
+Note that if $\mM\vsym{\alpha}=0$, then Equation \ref{eq:inactive_manifold} holds exactly for $\mW=[\vw]$, parameterized on $\vsym{\alpha}$. Also note that this fixed $\mM$ defines the residual for each $\vw_j$, as they are each parameterized on the same basis, albeit with a different $\vsym{\alpha}$. Na{\"i}vely, we may seek to minimize the residual $R$ directly; however, this optimization problem has a trivial solution $\vsym{\alpha}=0$. In practice we constrain the length via $\|\vsym{\alpha}\|_2\geq1$. Additionally, note that we wish to solve for a \emph{collection} of $\vsym{\alpha}_j$; we can accomplish this by demanding that each new $\vsym{\alpha}_j$ be orthogonal to the previous ones. Finally, we add a 1-norm term to encourage sparsity; we would like each $\vsym{\alpha}_i$ to be `simple', in the sense of being sparse. This leads to the following sequence of optimization problems
+
+\begin{equation}
+\begin{aligned}
+\label{eq:optimization}
+\text{min  }& \|\mM\vsym{\alpha}_j\|_2 + \beta\|\vsym{\alpha}_j\|_1, \\
+\text{s.t. }& \|\vsym{\alpha}_j\|_2\geq1, \\
+            & \mA_j^T \vsym{\alpha}_j = 0,
+\end{aligned}
+\end{equation}
+
+where $\beta>0$ is a tunable weighting parameter, and $\mA_j=[\vsym{\alpha}_1,\dots,\vsym{\alpha}_{j-1}]$, and $\mA_1=0$. Problem \ref{eq:optimization} has a convex objective function but a nonlinear constraint, thus we do \emph{not} enjoy the benefits of a convex problem. This creates issues when attempting to design a solver, which will be addressed in Section \ref{sec:solver}\ref{sec:solver_design}.
 
 %------------------------
-\subsection{Numerical Approximation}
+\subsection{Choice of Basis} \label{sec:basis}
+The choice of basis functions $\phi_i$ is crucial for obtaining an Active Manifold. The basis must be chosen to include $\mW(\vx)$, at least in some approximate sense. In the case of a Ridge Function the Active Manifolds are linear subspaces, so a linear choice of basis $\phi_i(\vx) = x_i$ is appropriate. In fact, choosing a linear basis and approximating Equation \ref{eq:inactive_manifold} by finding the nullspace via a Singular Value Decomposition (SVD) exactly recovers the Active Subspace procedure! To see this, substitute the linear basis into Equation \ref{eq:matrix_m} to find
+
+\begin{equation}
+\label{eq:matrix_m_linear}
+\mM_l = [\nabla f(\vx_1),\dots,\nabla f(\vx_n)]^T.
+\end{equation}
+
+Equation \ref{eq:inactive_manifold} corresponds to the condition $\mM_l\vsym{\alpha}=0$, which is a nullspace computation. This can be accomplished by considering the SVD of $\mM_l=U\Sigma V^T$; the vectors $\vv_i$ which correspond to the zero singular values $\sigma_i$ form a basis for the nullspace of $\mM_l$. These are found via an eigenvalue decomposition of $\mM_l^T\mM_l$, which equals
+
+\begin{equation}
+\label{eq:sum_m}
+\mM_l^T\mM_l = \sum_{i=1}^n \nabla f(x_i) \nabla f^T(x_i).
+\end{equation}
+
+Note that the Active Subspace is also found via an eigenvalue decomposition of the $\mC$ matrix, defined as the weighted average of the outer product of the gradient.\cite{constantine2015} Compare Equation \ref{eq:sum_m} to the Monte Carlo approximation of the $\mC$ matrix
+
+\begin{equation}
+\label{eq:sum_c}
+\hat{\mC} = \frac{1}{n} \sum_{i=1}^n \nabla f(x_i) \nabla f^T(x_i).
+\end{equation}
+
+Note that up to a factor of $n$, they are the same! Thus, for the correct choice of basis, the Active Manifold procedure defined above should recover Active Subspaces. This is important, as it shows that if our basis is chosen correctly and Problem \ref{eq:optimization} approximates Equation \ref{eq:inactive_manifold} well, we can do no worse than Active Subspaces.
+
+In this work, we try a number of different sets of basis functions, defined in Table \ref{tab:basis} below. These include both the linear basis and larger sets.
+
+\begin{table}
+\label{tab:basis}
+
+\end{table}
 
 %-------------------------------------------------
-\section{Solver Performance}
+\section{Solver} \label{sec:solver}
 %-------------------------------------------------
 
+%------------------------
+\subsection{Solver Design} \label{sec:solver_design}
+
+% Interior point with Log barriers and BFGS
+
+% Restart heuristic (modify code to do smarter restart?)
+
+%------------------------
+\subsection{Solver Performance} \label{sec:solver_performance}
+
+% Convergence in Residual
+
+% Comparison against Active Subspaces for Ridge Function
+
+% Comparison against AS for quadratic function
+
 %-------------------------------------------------
-\section{Conclusion}
+\section{Conclusion} \label{sec:conclusion}
 %-------------------------------------------------
 
 This had been a brief example of some of the more advanced options
