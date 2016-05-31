@@ -1,9 +1,11 @@
 % Zach del Rosario's LaTeX macros, May 2016
 % Inspired by Paul Constantine's macros
 
+\usepackage{amsmath} % Needed for \boldsymbol, etc.
+\usepackage{amsfonts} % Needed for \mathbb, etc.
 \usepackage{graphicx}
-\usepackage{caption}
-\usepackage{subcaption}
+% \usepackage{caption}
+% \usepackage{subcaption}
 
 % Image Macro: \img{filename}{caption}
 \newcommand{\img}[2]{
@@ -15,23 +17,23 @@
 	\end{figure} }
 
 % Double Image Macro: \img{file1}{file2}{caption1}{caption2}
-\newcommand{\imgtwo}[4]{
-	\begin{figure}
-	\centering
-	\begin{minipage}{.5\textwidth}
-		\centering
-		\includegraphics[width=0.9\linewidth]{../images/#1}
-		\captionof{figure}{#3}
-		\label{fig:#1}
-	\end{minipage}%
-	\begin{minipage}{.5\textwidth}
-		\centering
-		\includegraphics[width=0.9\linewidth]{../images/#2}
-		\captionof{figure}{#4}
-		\label{fig:#2}
-	\end{minipage}
-	\end{figure}
-}
+% \newcommand{\imgtwo}[4]{
+% 	\begin{figure}
+% 	\centering
+% 	\begin{minipage}{.5\textwidth}
+% 		\centering
+% 		\includegraphics[width=0.9\linewidth]{../images/#1}
+% 		\captionof{figure}{#3}
+% 		\label{fig:#1}
+% 	\end{minipage}%
+% 	\begin{minipage}{.5\textwidth}
+% 		\centering
+% 		\includegraphics[width=0.9\linewidth]{../images/#2}
+% 		\captionof{figure}{#4}
+% 		\label{fig:#2}
+% 	\end{minipage}
+% 	\end{figure}
+% }
 
 % Table Macro: \tab{filename}{caption}
 \newcommand{\tab}[2]{
