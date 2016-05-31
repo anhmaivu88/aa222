@@ -20,9 +20,9 @@
  \title{Pursuing Active Manifolds via Nonlinear Optimization}
 
  \author{
-  Zachary R. del Rosario\thanks{Job Title, Department, Address, and AIAA Member Grade.}\\
+  Zachary R. del Rosario\thanks{PhD Candidate, Aeronautics and Astronautics, 496 Lomita Mall, Stanford CA, AIAA Student Member.}\\
   {\normalsize\itshape
-   Stanford University, Stanford, CA, 94305, USA}\\
+   Stanford University, Stanford CA, 94305, USA}\\
  }
 
  % Data used by 'handcarry' option
@@ -47,29 +47,38 @@ Abstract
 
 \printnomenclature % creates nomenclature section produced by MakeIndex
 
+%-------------------------------------------------
 \section{Introduction}
+%-------------------------------------------------
 
-\lettrine[nindent=0pt]{T}{his} paragraph should be a `soft introduction'. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris eu vehicula diam, quis tempus nunc. Nunc rutrum leo vitae placerat lacinia. Nulla sodales, sem quis imperdiet dictum, felis ante iaculis erat, vel tincidunt odio urna eget erat. Sed eu faucibus neque, tempus porttitor augue.
+\lettrine[nindent=0pt]{O}{ne} of the most challenging difficulties facing high-fidelity modeling is the treatment of high-dimensional parameter spaces: the Curse of Dimensionality. Consider a parameter study on some quantity of interest (QoI) $f$ in a space of dimension $m$; a simple heuristic is to use $10$ points per dimension, in order to well represent the parameter space. Then the total number of sample points is $10^m$. If a computer code implementing our model executes in a fixed time of $1$ second, then our parameter study execution time scales exponentially. Figure \ref{fig:curse_of_dimensionality} depicts the aforementioned scenario.
 
 \begin{wrapfigure}{R}{0.5\linewidth}
  \includegraphics{../images/curse_of_dimensionality}
- \caption{The execution time of many studies increases exponentially with the dimensionality of parameter space.}
- \label{fig:dimensionality}
+ \caption{Execution time scales exponentially with the dimension of parameter space.}
+ \label{fig:curse_of_dimensionality}
 \end{wrapfigure}
 
-This paragraph should introduce the Curse of Dimensionality; the motivation behind Dimension Reduction. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris eu vehicula diam, quis tempus nunc. Nunc rutrum leo vitae placerat lacinia. Nulla sodales, sem quis imperdiet dictum, felis ante iaculis erat, vel tincidunt odio urna eget erat. Sed eu faucibus neque, tempus porttitor augue. Fusce nec semper lectus, a varius est. Fusce ultricies euismod enim vel porta. Suspendisse accumsan, libero dignissim consectetur eleifend, nulla ligula dictum tellus, sit amet placerat risus diam in ipsum. Donec leo turpis, porta sit amet ipsum sit amet, mattis varius ipsum. Praesent ac ante aliquet, lacinia nulla in, interdum nunc. Curabitur dictum porta ipsum, at egestas libero blandit vitae. Sed tristique viverra erat. Ut mauris eros, bibendum sed massa vel, congue dignissim tortor. Interdum et malesuada fames ac ante ipsum primis in faucibus. Nullam consectetur sed sapien sed sollicitudin. Curabitur et justo a dolor pulvinar tincidunt non ac lacus. 
+The only reasonable strategy to mitigate this challenge is to perform \emph{dimension reduction}, that is, to reduce $m$. One scheme for dimension reduction of this sort is to seek \emph{Active Subspaces} -- linear subspaces in parameter space along which the majority of variation in our QoI is captured. \cite{constantine2015} The Active Subspaces approach gives a `perfect' dimension reduction in the case that our QoI is a Ridge Function; that is, for $\vx\in\mathbb{R}^m$ and $\mA\in\mathbb{R}^{m\times k}$ with $k<m$, we have $f(\vx)=g(\mA^T\vx)$. Note that a Ridge Function is constant along directions which are orthogonal to $\mA$, that is
 
-\begin{wrapfigure}{L}{0.5\linewidth}
+\begin{equation}
+\mW^T\nabla f = 0,\text{ for } \mW^TA = 0. \label{eq:ridge_property}
+\end{equation}
+
+\begin{wrapfigure}{R}{1.0\linewidth}
  \includegraphics{../images/surface_plot}
- \caption{Example of Active Subspaces.}
+ \caption{Active and Inactive directions for example function. Note that on average, the function changes more along the active directions than the inactive directions; in this case, the change in the inactive direction is exactly zero.}
  \label{fig:as_example}
 \end{wrapfigure}
 
-This paragraph should introduce Active Subspaces, give an example of its use, and discuss some limitations. \cite{constantine2015} Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris eu vehicula diam, quis tempus nunc. Nunc rutrum leo vitae placerat lacinia. Nulla sodales, sem quis imperdiet dictum, felis ante iaculis erat, vel tincidunt odio urna eget erat. Sed eu faucibus neque, tempus porttitor augue. Fusce nec semper lectus, a varius est. Fusce ultricies euismod enim vel porta. Suspendisse accumsan, libero dignissim consectetur eleifend, nulla ligula dictum tellus, sit amet placerat risus diam in ipsum. Donec leo turpis, porta sit amet ipsum sit amet, mattis varius ipsum. Praesent ac ante aliquet, lacinia nulla in, interdum nunc. Curabitur dictum porta ipsum, at egestas libero blandit vitae. Sed tristique viverra erat. Ut mauris eros, bibendum sed massa vel, congue dignissim tortor. Interdum et malesuada fames ac ante ipsum primis in faucibus. Nullam consectetur sed sapien sed sollicitudin. Curabitur et justo a dolor pulvinar tincidunt non ac lacus.
+One example of a Ridge Function is $f(\vx) = \frac{1}{2}(.7x_1+.3x_2)^2$. In this case, the Active Subspace approach discovers the Active and Inactive directions, depicted in Figure \ref{fig:as_example}. Note that this gives us a `perfect' dimension reduction, as we can completely neglect changes along the direction $[-.3,.7]^T$. Such Ridge Functions may seem like a contrivance, but they are actually quite common in multivariate Fourier Transforms\cite{pinkus2015} and physical laws in general.\cite{Constantine2016} Nevertheless, Ridge Functions are not the only functional form that arises in practice; while approximate Active Subspaces are useful, it is easy to construct functions which do not admit this sort of low-dimensional structure.
 
-This paragraph should briefly introduce the idea of Active Manifolds.
+A natural generalization of Active Subspaces is to seek \emph{Active Manifolds}; that is curved subsets of parameter space which capture the variability of a function. Such low-dimensional structures should recover linear subspaces in the case that they exist (i.e. a Ridge Function), and more general spaces when they do not. Note that if a function is differentiable, we can always move along the gradient to capture the full variability of a function -- unfortunately this requires perfect knowledge of the function, which brings us back to the Curse of Dimensionality. In practice we must use a limited number of gradient samples (assumed to be available, say through an adjoint solution\cite{Jameson1988} or automatic differentiation\cite{Rall1981}) to numerically approximate such a manifold.
 
+%-------------------------------------------------
 \section{Seeking Active Manifolds}
+%-------------------------------------------------
+The strategy we will adopt in this work is to generalize the properties of a Ridge Function: By allowing Equation \ref{eq:ridge_property} to vary in space, we arrive at
 
 \begin{equation}
   \label{eq:inactive_manifold}
@@ -80,7 +89,16 @@ This paragraph should briefly introduce the idea of Active Manifolds.
 \nomenclature{$\nabla f(\vx)$}{Gradient of QoI}%
 \nomenclature{$\mW(\vx)$}{Manifold vector}%
 
+%------------------------
+\subsection{Numerical Approximation}
+
+%-------------------------------------------------
+\section{Solver Performance}
+%-------------------------------------------------
+
+%-------------------------------------------------
 \section{Conclusion}
+%-------------------------------------------------
 
 This had been a brief example of some of the more advanced options
 available for \LaTeX.
