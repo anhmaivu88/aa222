@@ -7,6 +7,7 @@ from ad.admath import log
 from numpy.random import random
 from ad import gh
 import sys
+from scipy.linalg import svd
 
 import matplotlib
 # choose the backend to handle window geometry
@@ -33,7 +34,7 @@ m_des   = 2         # Desired manifolds
 res_t   = 1e-3      # Absolute tolerance for residual
 iter_max= 10        # Maximum restarts for solver
 # Plot settings
-offset = [(0,500),(700,500)] # Plot window locations
+offset = [(0,500),(700,500),(1400,500)] # Plot window locations
 
 ##################################################
 # Command Line Inputs
@@ -166,15 +167,23 @@ for i in range(m_des):
     print "W[:,"+str(i)+"] = \n{}".format(W[:,i])
 
 ##################################################
+# Compare the SVD
+##################################################
+u,l,v = svd(M)
+W_svd = v.T
+Res_svd = l
+
+##################################################
 # Plotting
 ##################################################
 
 ### Residuals
 fig = plt.figure()
 plt.plot(Res,'k*')
+plt.plot(Res_svd,'bo')
 plt.yscale('log')
-plt.xlim([-0.5,len(Res)-0.5])
-plt.xticks(range(len(Res)))
+plt.xlim([-0.5,len(Res_svd)-0.5])
+plt.xticks(range(len(Res_svd)))
 # Annotation
 plt.title("Residuals")
 plt.xlabel("Index")
@@ -202,6 +211,26 @@ plt.ylabel("Entry")
 manager = plt.get_current_fig_manager()
 x,y,dx,dy = manager.window.geometry().getRect()
 manager.window.setGeometry(offset[1][0],offset[1][1],dx,dy)
+
+### Vectors via SVD
+N   = len(W_svd[:,0])
+ind = np.arange(N)
+wid = 1./3. * 0.9
+
+fig = plt.figure()
+plt.bar(ind    ,W_svd[:,0],wid,color='k')
+plt.bar(ind+wid,W_svd[:,1],wid,color='b')
+plt.bar(ind+wid*2,W_svd[:,2],wid,color='r')
+plt.xlim([-0.5,N+0.5])
+plt.xticks(ind+wid,Labels)
+# Annotation
+plt.title("Vectors via SVD")
+plt.xlabel("Index")
+plt.ylabel("Entry")
+# Set plot location on screen
+manager = plt.get_current_fig_manager()
+x,y,dx,dy = manager.window.geometry().getRect()
+manager.window.setGeometry(offset[2][0],offset[2][1],dx,dy)
 
 # Show all plots
 plt.show()
