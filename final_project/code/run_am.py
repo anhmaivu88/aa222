@@ -23,6 +23,7 @@ from barrier import feasible
 import util
 
 from seek_am import seek_am
+from get_basis import get_basis
 
 ##################################################
 ## Setup
@@ -57,69 +58,8 @@ else:
     print("Default basis selected...")
     my_base = 0
 
-# Define basis functions
-if my_base == 1:
-    # Second Order
-    Phi = [ lambda x: x[0],
-            lambda x: x[1],
-            lambda x: x[2],
-            lambda x: x[0]**2,
-            lambda x: x[1]**2,
-            lambda x: x[2]**2,
-            lambda x: log(abs(x[0])),
-            lambda x: log(abs(x[1])),
-            lambda x: log(abs(x[2]))]
-    Labels = ["X_1",
-              "Y_1",
-              "Z_1",
-              "X_2",
-              "Y_2",
-              "Z_2",
-              "X_3",
-              "Y_3",
-              "Z_3"]
-elif my_base == 2:
-    # Third Order
-    Phi = [ lambda x: x[0],
-            lambda x: x[1],
-            lambda x: x[2],
-            lambda x: x[0]**2,
-            lambda x: x[1]**2,
-            lambda x: x[2]**2,
-            lambda x: x[0]**3,
-            lambda x: x[1]**3,
-            lambda x: x[2]**3,
-            lambda x: log(abs(x[0])),
-            lambda x: log(abs(x[1])),
-            lambda x: log(abs(x[2])),
-            lambda x: x[0]**(-1),
-            lambda x: x[1]**(-1),
-            lambda x: x[2]**(-1),]
-    Labels = ["x_1",
-              "x_2",
-              "x_3",
-              "x_1^2",
-              "x_2^2",
-              "x_3^2",
-              "x_1^3",
-              "x_2^3",
-              "x_3^3",
-              "log(|x_1|)",
-              "log(|x_2|)",
-              "log(|x_3|)",
-              "x_1^(-1)",
-              "x_2^(-1)",
-              "x_3^(-1)"]
-else:
-    # Active Subspace
-    Phi = [ lambda x: x[0],
-            lambda x: x[1],
-            lambda x: x[2]]
-    Labels = ["x_1",
-              "x_2",
-              "x_3"]
-# Gradients 
-dPhi = [gh(f)[0] for f in Phi]
+# Choose basis
+Phi,dPhi,Labels = get_basis(my_base,m)
 
 #################################################
 ## Experiment Cases
@@ -212,25 +152,25 @@ manager = plt.get_current_fig_manager()
 x,y,dx,dy = manager.window.geometry().getRect()
 manager.window.setGeometry(offset[1][0],offset[1][1],dx,dy)
 
-### Vectors via SVD
-N   = len(W_svd[:,0])
-ind = np.arange(N)
-wid = 1./3. * 0.9
+# ### Vectors via SVD
+# N   = len(W_svd[:,0])
+# ind = np.arange(N)
+# wid = 1./3. * 0.9
 
-fig = plt.figure()
-plt.bar(ind    ,W_svd[:,0],wid,color='k')
-plt.bar(ind+wid,W_svd[:,1],wid,color='b')
-plt.bar(ind+wid*2,W_svd[:,2],wid,color='r')
-plt.xlim([-0.5,N+0.5])
-plt.xticks(ind+wid,Labels)
-# Annotation
-plt.title("Vectors via SVD")
-plt.xlabel("Index")
-plt.ylabel("Entry")
-# Set plot location on screen
-manager = plt.get_current_fig_manager()
-x,y,dx,dy = manager.window.geometry().getRect()
-manager.window.setGeometry(offset[2][0],offset[2][1],dx,dy)
+# fig = plt.figure()
+# plt.bar(ind    ,W_svd[:,0],wid,color='k')
+# plt.bar(ind+wid,W_svd[:,1],wid,color='b')
+# plt.bar(ind+wid*2,W_svd[:,2],wid,color='r')
+# plt.xlim([-0.5,N+0.5])
+# plt.xticks(ind+wid,Labels)
+# # Annotation
+# plt.title("Vectors via SVD")
+# plt.xlabel("Index")
+# plt.ylabel("Entry")
+# # Set plot location on screen
+# manager = plt.get_current_fig_manager()
+# x,y,dx,dy = manager.window.geometry().getRect()
+# manager.window.setGeometry(offset[2][0],offset[2][1],dx,dy)
 
 # Show all plots
 plt.show()
