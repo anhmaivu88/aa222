@@ -30,9 +30,9 @@ from get_objective import get_objective
 ## Setup
 ##################################################
 # Parameters
-n       = int(1e2)  # monte carlo samples
-res_t   = 1e-3      # Absolute tolerance for residual
-iter_max= 10        # Maximum restarts for solver
+n         = int(1e2)  # monte carlo samples
+res_t     = 1e-3      # Absolute tolerance for residual
+reset_max = 10        # Maximum restarts for solver
 # Plot settings
 offset = [(0,700),(700,700),(1400,700),(2100,700)] # Plot window locations
 
@@ -41,35 +41,33 @@ eps = np.finfo(float).eps # Machine epsilon
 ##################################################
 # Command Line Inputs
 ##################################################
-# if len(sys.argv) < 2:
-#     print('Usage:')
-#     print('    python {} [case choice] [basis choice]'.format(sys.argv[0]))
-#     exit()
+if len(sys.argv) < 2:
+    print('Usage:')
+    print('    python {} [input file]'.format(sys.argv[0]))
+    exit()
 
 # Problem selection
 if len(sys.argv) > 1:
-    m       = int(sys.argv[1]) # Dimension of problem
-    m_des   = m-1              # Desired manifolds
-else:
-    print("Default dimension m=3 selected...")
-    m       = 3         # Dimension of problem
-    m_des   = 2         # Desired manifolds
-if len(sys.argv) > 2:
-    my_case = int(sys.argv[2])
-else:
-    print("Default case selected...")
-    my_case = 0
-# Basis selection
-if len(sys.argv) > 3:
-    my_base = int(sys.argv[3])
-else:
-    print("Default basis selected...")
-    my_base = 0
+    filename = sys.argv[1] # name of input file
+    f = open(filename)
+    for line in f:
+        l = line.split()
+        # Switch based on flag
+        if l[0].lower() == 'm':
+            m = int(l[1])
+        if l[0].lower() == 'm_des':
+            m_des = int(l[1])
+        elif l[0].lower() == 'basis':
+            my_base = int(l[1])
+        elif l[0].lower() == 'case':
+            my_case = int(l[1])
+        elif l[0].lower() == 'title':
+            title_case = l[1]
+        elif l[0].lower() == 'plot':
+            plotting = int(l[1])
 
-# Enable plotting if dimensionality low enough
-if m < 7:
-    plotting = True
-else:
+# Disable plotting if dimensionality too high
+if m > 6:
     plotting = False
 
 # Choose basis
@@ -95,7 +93,7 @@ M = np.array(M)
 ## Active Manifold Pursuit
 ##################################################
 W, Res, resets, Res_full, Obj_full = \
-            seek_am(M, res_thresh = res_t, m_des = m_des, \
+            seek_am(M, res_thresh = res_t, m_des = m_des, reset_max = reset_max, \
                     verbose=True, full=True)
 
 sequence = [len(l) for l in Res_full]
