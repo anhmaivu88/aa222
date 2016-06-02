@@ -4,12 +4,13 @@ from ad.admath import log
 def get_basis(my_base,dim):
     """Returns a set of basis functions for AM pursuit
     Usage
-        Phi, dPhi, Labels = get_basis(my_base)
+        Phi, dPhi, name, Labels = get_basis(my_base)
     Arguments
         my_base = integer selection
     Returns
         Phi    = scalar basis functions
         dPhi   = gradients of basis functions
+        name   = name of basis type
         Labels = string label for each basis function
     """
     # Define basis functions
@@ -24,6 +25,8 @@ def get_basis(my_base,dim):
                  ["G_"+str(i) for i in range(dim)]
         # Gradients 
         dPhi = [gh(f)[0] for f in Phi]
+        # Name
+        name = "Second-Order"
     elif my_base == 2:
         # Third Order
         Phi = [lambda x, i=i: x[i] for i in range(dim)] + \
@@ -39,6 +42,8 @@ def get_basis(my_base,dim):
                  ["I_"+str(i) for i in range(dim)]
         # Gradients 
         dPhi = [gh(f)[0] for f in Phi]
+        # Name
+        name = "Third-Order"
     elif my_base == 3:
         # 2nd Order Legendre Basis
         Phi = [lambda x, i=i: x[i] for i in range(dim)] + \
@@ -50,8 +55,10 @@ def get_basis(my_base,dim):
                  ["P_2_"+str(i) for i in range(dim)]
         # Gradients 
         dPhi = [gh(f)[0] for f in Phi]
+        # Name
+        name = "Legendre Second-Order"
     elif my_base == 4:
-        # 2nd Order Legendre Basis
+        # 3nd Order Legendre Basis
         Phi = [lambda x, i=i: x[i] for i in range(dim)] + \
               [lambda x, i=i: 0.5*x[i]**2 for i in range(dim)] + \
               [lambda x, i=i: 0.5*(x[i]**3-x[i]) for i in range(dim)] + \
@@ -63,6 +70,8 @@ def get_basis(my_base,dim):
                  ["P_3_"+str(i) for i in range(dim)]
         # Gradients 
         dPhi = [gh(f)[0] for f in Phi]
+        # Name
+        name = "Legendre Third-Order"
     else:
         # Active Subspace
         Phi = [lambda x: x[i] for i in range(dim)]
@@ -70,5 +79,7 @@ def get_basis(my_base,dim):
         Labels = ["L_"+str(i) for i in range(dim)]
         # Gradients 
         dPhi = [gh(f)[0] for f in Phi]
+        # Name
+        name = "Linear"
 
-    return Phi, dPhi, Labels
+    return Phi, dPhi, name, Labels

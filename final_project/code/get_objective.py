@@ -1,7 +1,12 @@
 import numpy as np
 from ad import gh
 from util import col
-from random import random
+from random import random, randint
+
+def rs():
+    """Random scalar
+    """
+    return 2.*(random()-0.5)
 
 def get_objective(my_case,dim,full=False):
     """Return an m-dimensional objective function
@@ -24,9 +29,9 @@ def get_objective(my_case,dim,full=False):
     # Double-Ridge Function
     if my_case == 1:
         # Random vector
-        A = [2.*(random()-0.5) for i in range(dim)]
-        B = [2.*(random()-0.5) for i in range(dim)]
-        # Ridge Function
+        A = [rs() for i in range(dim)]
+        B = [rs() for i in range(dim)]
+        # Construct function
         fcn = lambda x: sum([x[i]*A[i] for i in range(len(A))])**2 + \
                         sum([x[i]*B[i] for i in range(len(B))])**2
         grad, _ = gh(fcn)
@@ -34,11 +39,41 @@ def get_objective(my_case,dim,full=False):
         opt = [A,B]
         # Function type name
         name = "Double-Ridge"
+    # Mixed Function
+    elif my_case == 2:
+        n = dim/2
+        m = dim-n
+        # Sparse random vector
+        A = [rs() for i in range(n)] + [0]*m
+        # Complementary sparse random vector
+        B = [0]*n + [rs() for i in range(m)]
+        # Construct function
+        fcn = lambda x: sum([x[i]*A[i] for i in range(len(A))]) + \
+                        sum([x[i]**2*B[i] for i in range(len(B))])
+        grad, _ = gh(fcn)
+        # Optional outputs
+        opt = [A,B]
+        # Function type name
+        name = "Mixed"
+    # Randomly-Mixed Function
+    elif my_case == 3:
+        # Sparse random vector
+        A = [rs()*randint(0,1) for i in range(dim)]
+        # Complementary sparse random vector
+        B = [(A[i]==0)*rs()*randint(0,1) for i in range(dim)]
+        # Construct function
+        fcn = lambda x: sum([x[i]*A[i] for i in range(len(A))]) + \
+                        sum([x[i]**2*B[i] for i in range(len(B))])
+        grad, _ = gh(fcn)
+        # Optional outputs
+        opt = [A,B]
+        # Function type name
+        name = "Random-Mixed"
     # Single-Ridge Function
     else:
         # Random vector
-        A = [2.*(random()-0.5) for i in range(dim)]
-        # Ridge Function
+        A = [rs() for i in range(dim)]
+        # Construct function
         fcn = lambda x: sum([x[i]*A[i] for i in range(len(A))])**2
         grad, _ = gh(fcn)
         # Optional outputs

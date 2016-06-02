@@ -36,6 +36,8 @@ iter_max= 10        # Maximum restarts for solver
 # Plot settings
 offset = [(0,700),(700,700),(1400,700),(2100,700)] # Plot window locations
 
+eps = np.finfo(float).eps # Machine epsilon
+
 ##################################################
 # Command Line Inputs
 ##################################################
@@ -64,13 +66,19 @@ else:
     print("Default basis selected...")
     my_base = 0
 
+# Enable plotting if dimensionality low enough
+if m < 7:
+    plotting = True
+else:
+    plotting = False
+
 # Choose basis
-Phi,dPhi,Labels = get_basis(my_base,m)
+Phi, dPhi, basis_name, Labels = get_basis(my_base,m)
 
 #################################################
 ## Experiment Cases
 #################################################
-fcn, grad, name, opt = get_objective(my_case,m,full=True)
+fcn, grad, case_name, opt = get_objective(my_case,m,full=True)
 
 #################################################
 ## Monte Carlo Method
@@ -90,6 +98,8 @@ W, Res, resets, Res_full, Obj_full = \
             seek_am(M, res_thresh = res_t, m_des = m_des, \
                     verbose=True, full=True)
 
+sequence = [len(l) for l in Res_full]
+
 ##################################################
 ## Results
 ##################################################
@@ -97,10 +107,12 @@ W, Res, resets, Res_full, Obj_full = \
 # Command line printback
 print "Problem Setup:"
 print "Dimensionality = {}".format(m)
-print "Objective type = {}".format(name)
+print "Basis type     = {}".format(basis_name)
+print "Objective type = {}".format(case_name)
 print "AM Results:"
 print "Solver resets  = {}".format(resets)
 print "Residuals      = \n{}".format(Res)
+print "Iter. counts   = \n{}".format(sequence)
 print "Function param = \n{}".format(opt)
 print "Leading Vectors:"
 for i in range(m_des):
@@ -110,79 +122,83 @@ for i in range(m_des):
 # Plotting
 ##################################################
 
-### Residuals
-fig = plt.figure()
-plt.plot(Res,'k*')
-plt.yscale('log')
-plt.xlim([-0.5,len(Res)-0.5])
-plt.xticks(range(len(Res)))
-# Annotation
-plt.title("Residuals")
-plt.xlabel("Index")
-plt.ylabel("Residual")
-# Set plot location on screen
-manager = plt.get_current_fig_manager()
-x,y,dx,dy = manager.window.geometry().getRect()
-manager.window.setGeometry(offset[0][0],offset[0][1],dx,dy)
+if plotting:
+    ### Residuals
+    # Floor the residuals on machine epsilon
+    Res = [max(Res[i],eps) for i in range(len(Res))]
 
-### Vectors
-N   = len(W[:,0])
-ind = np.arange(N)
-wid = 0.35
+    fig = plt.figure()
+    plt.plot(Res,'k*')
+    plt.yscale('log')
+    plt.xlim([-0.5,len(Res)-0.5])
+    plt.xticks(range(len(Res)))
+    # Annotation
+    plt.title("Residuals")
+    plt.xlabel("Index")
+    plt.ylabel("Residual")
+    # Set plot location on screen
+    manager = plt.get_current_fig_manager()
+    x,y,dx,dy = manager.window.geometry().getRect()
+    manager.window.setGeometry(offset[0][0],offset[0][1],dx,dy)
 
-fig = plt.figure()
-plt.bar(ind    ,W[:,0],wid,color='b')
-plt.bar(ind+wid,W[:,1],wid,color='r')
-plt.xlim([-0.5,N+0.5])
-plt.xticks(ind+wid,Labels)
-# Annotation
-plt.title("Vectors")
-plt.xlabel("Index")
-plt.ylabel("Entry")
-# Set plot location on screen
-manager = plt.get_current_fig_manager()
-x,y,dx,dy = manager.window.geometry().getRect()
-manager.window.setGeometry(offset[1][0],offset[1][1],dx,dy)
+    ### Vectors
+    N   = len(W[:,0])
+    ind = np.arange(N)
+    wid = 0.35
 
-### Residual sequences
-longest = 0
-res_colors  = ['b-*','r-*','g-*','k-*']
+    fig = plt.figure()
+    plt.bar(ind    ,W[:,0],wid,color='b')
+    plt.bar(ind+wid,W[:,1],wid,color='r')
+    plt.xlim([-0.5,N+0.5])
+    plt.xticks(ind+wid,Labels)
+    # Annotation
+    plt.title("Vectors")
+    plt.xlabel("Index")
+    plt.ylabel("Entry")
+    # Set plot location on screen
+    manager = plt.get_current_fig_manager()
+    x,y,dx,dy = manager.window.geometry().getRect()
+    manager.window.setGeometry(offset[1][0],offset[1][1],dx,dy)
 
-fig = plt.figure()
-for i in range(len(Res_full)):
-    plt.plot(Res_full[i],res_colors[i])
-    longest = max(longest,len(Res_full[i]))
+    ### Residual sequences
+    longest = 0
+    res_colors  = ['b-*','r-*','g-*','k-*','c-*','m-*','y-*']
 
-plt.yscale('log')
-plt.xlim([-0.5,longest+0.5])
-# Annotation
-plt.title("Residual Sequences")
-plt.xlabel("Iteration")
-plt.ylabel("Residual")
-# Set plot location on screen
-manager = plt.get_current_fig_manager()
-x,y,dx,dy = manager.window.geometry().getRect()
-manager.window.setGeometry(offset[2][0],offset[2][1],dx,dy)
+    fig = plt.figure()
+    for i in range(len(Res_full)):
+        plt.plot(Res_full[i],res_colors[i])
+        longest = max(longest,len(Res_full[i]))
 
-### Residual sequences
-longest = 0
-obj_colors  = ['b-*','r-*','g-*','k-*']
+    plt.yscale('log')
+    plt.xlim([-0.5,longest+0.5])
+    # Annotation
+    plt.title("Residual Sequences")
+    plt.xlabel("Iteration")
+    plt.ylabel("Residual")
+    # Set plot location on screen
+    manager = plt.get_current_fig_manager()
+    x,y,dx,dy = manager.window.geometry().getRect()
+    manager.window.setGeometry(offset[2][0],offset[2][1],dx,dy)
 
-fig = plt.figure()
-for i in range(len(Obj_full)):
-    plt.plot(Obj_full[i],obj_colors[i])
-    longest = max(longest,len(Obj_full[i]))
+    ### Residual sequences
+    longest = 0
+    obj_colors  = ['b-*','r-*','g-*','k-*','c-*','m-*','y-*']
 
-plt.yscale('log')
-plt.xlim([-0.5,longest+0.5])
-# Annotation
-plt.title("Residual Sequences")
-plt.xlabel("Iteration")
-plt.ylabel("Residual")
-# Set plot location on screen
-manager = plt.get_current_fig_manager()
-x,y,dx,dy = manager.window.geometry().getRect()
-manager.window.setGeometry(offset[3][0],offset[3][1],dx,dy)
+    fig = plt.figure()
+    for i in range(len(Obj_full)):
+        plt.plot(Obj_full[i],obj_colors[i])
+        longest = max(longest,len(Obj_full[i]))
 
-# Show all plots
-plt.show()
+    plt.yscale('log')
+    plt.xlim([-0.5,longest+0.5])
+    # Annotation
+    plt.title("Objective Sequences")
+    plt.xlabel("Iteration")
+    plt.ylabel("Residual")
+    # Set plot location on screen
+    manager = plt.get_current_fig_manager()
+    x,y,dx,dy = manager.window.geometry().getRect()
+    manager.window.setGeometry(offset[3][0],offset[3][1],dx,dy)
+
+    # Show all plots
+    plt.show()
