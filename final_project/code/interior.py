@@ -5,14 +5,10 @@ from scipy.optimize import fmin_bfgs
 # Custom libraries
 from barrier import log_barrier, inv_barrier, ext_obj
 
-# BFGS Call
-# res = fmin_bfgs(F,x0,fprime=dF,retall=True)
-# res = (x*,Xs)
-
 def constrained_opt(F,G,x0,tol=1e-8,it_max=1e3):
     """ Constrained Optimization via interior point method
     Usage
-        xs, Fs, Gs, X, it = constrained_opt(F,G,x0)
+        xs, Fs, Gs, X, Ft = constrained_opt(F,G,x0)
     Arguments
         F       = objective function, R^n->R
         G       = leq constraints, R^n->R^k
@@ -42,8 +38,6 @@ def constrained_opt(F,G,x0,tol=1e-8,it_max=1e3):
     ### Feasibility problem
     G0     = lambda x: ext_obj(G(x),s)
     # Minimize G0
-    # xs, X = fmin_bfgs(G0,x0,retall=True,disp=False)
-    # Ft = [G0(x) for x in X]
     xs, _ = fmin_bfgs(G0,x0,retall=True,disp=False)
     X  = np.array([xs])
     Ft = [F(xs)+log_barrier(G(xs))/r]
