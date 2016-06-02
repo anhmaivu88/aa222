@@ -24,6 +24,7 @@ import util
 
 from seek_am import seek_am
 from get_basis import get_basis
+from get_objective import get_objective
 
 ##################################################
 ## Setup
@@ -68,18 +69,7 @@ Phi,dPhi,Labels = get_basis(my_base,m)
 #################################################
 ## Experiment Cases
 #################################################
-if my_case == 1:
-    # Quadratic
-    fcn = lambda x: x[0]**2 + x[1]**2 - 2.0*x[2]**2
-    grad, _ = gh(fcn)
-elif my_case == 2:
-    # Mixed Terms
-    fcn = lambda x: x[0] + x[1] - 2.0*x[2]**2
-    grad, _ = gh(fcn)
-else:
-    # Ridge Function
-    fcn = lambda x: 0.5*(0.3*x[0]+0.3*x[1]+0.7*x[2])**2
-    grad, _ = gh(fcn)
+fcn, grad, name, opt = get_objective(my_case,m,full=True)
 
 #################################################
 ## Monte Carlo Method
@@ -103,9 +93,13 @@ W, Res, it = seek_am(M, res_thresh = res_t, m_des = m_des, \
 ##################################################
 
 # Command line printback
+print "Problem Setup:"
+print "Dimensionality = {}".format(m)
+print "Objective type = {}".format(name)
 print "AM Results:"
-print "Solver resets = {}".format(it)
-print "Residuals     = \n{}".format(Res)
+print "Solver resets  = {}".format(it)
+print "Residuals      = \n{}".format(Res)
+print "Function param = \n{}".format(opt)
 print "Leading Vectors:"
 for i in range(m_des):
     print "W[:,"+str(i)+"] = \n{}".format(W[:,i])
@@ -155,26 +149,6 @@ plt.ylabel("Entry")
 manager = plt.get_current_fig_manager()
 x,y,dx,dy = manager.window.geometry().getRect()
 manager.window.setGeometry(offset[1][0],offset[1][1],dx,dy)
-
-# ### Vectors via SVD
-# N   = len(W_svd[:,0])
-# ind = np.arange(N)
-# wid = 1./3. * 0.9
-
-# fig = plt.figure()
-# plt.bar(ind    ,W_svd[:,0],wid,color='k')
-# plt.bar(ind+wid,W_svd[:,1],wid,color='b')
-# plt.bar(ind+wid*2,W_svd[:,2],wid,color='r')
-# plt.xlim([-0.5,N+0.5])
-# plt.xticks(ind+wid,Labels)
-# # Annotation
-# plt.title("Vectors via SVD")
-# plt.xlabel("Index")
-# plt.ylabel("Entry")
-# # Set plot location on screen
-# manager = plt.get_current_fig_manager()
-# x,y,dx,dy = manager.window.geometry().getRect()
-# manager.window.setGeometry(offset[2][0],offset[2][1],dx,dy)
 
 # Show all plots
 plt.show()
