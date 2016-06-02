@@ -15,48 +15,35 @@ def get_basis(my_base,dim):
     # Define basis functions
     if my_base == 1:
         # Second Order
-        Phi = []
-        # Linear basis
-        for i in range(dim):
-            print(type(i))
-            Phi.append( lambda x: x[i] )
-        # Quadratic basis
-        for i in range(dim):
-            Phi.append( lambda x: x[i]**2 )
-        # Log basis
-        for i in range(dim):
-            Phi.append( lambda x: log(abs(x[i])) )
+        Phi = [lambda x, i=i: x[i] for i in range(dim)] + \
+              [lambda x, i=i: x[i]**2 for i in range(dim)] + \
+              [lambda x, i=i: log(abs(x[i])) for i in range(dim)]
         # Gradients 
         dPhi = [gh(f)[0] for f in Phi]
-    elif my_base == 1.5:
-        Phi = [ lambda x: x[0],
-                lambda x: x[1],
-                lambda x: x[2],
-                lambda x: x[0]**2,
-                lambda x: x[1]**2,
-                lambda x: x[2]**2,
-                lambda x: log(abs(x[0])),
-                lambda x: log(abs(x[1])),
-                lambda x: log(abs(x[2]))]
         # Gradients 
         dPhi = [gh(f)[0] for f in Phi]
     elif my_base == 2:
         # Third Order
-        Phi = [ lambda x: x[0],
-                lambda x: x[1],
-                lambda x: x[2],
-                lambda x: x[0]**2,
-                lambda x: x[1]**2,
-                lambda x: x[2]**2,
-                lambda x: x[0]**3,
-                lambda x: x[1]**3,
-                lambda x: x[2]**3,
-                lambda x: log(abs(x[0])),
-                lambda x: log(abs(x[1])),
-                lambda x: log(abs(x[2])),
-                lambda x: x[0]**(-1),
-                lambda x: x[1]**(-1),
-                lambda x: x[2]**(-1),]
+        # Phi = [ lambda x: x[0],
+        #         lambda x: x[1],
+        #         lambda x: x[2],
+        #         lambda x: x[0]**2,
+        #         lambda x: x[1]**2,
+        #         lambda x: x[2]**2,
+        #         lambda x: x[0]**3,
+        #         lambda x: x[1]**3,
+        #         lambda x: x[2]**3,
+        #         lambda x: log(abs(x[0])),
+        #         lambda x: log(abs(x[1])),
+        #         lambda x: log(abs(x[2])),
+        #         lambda x: x[0]**(-1),
+        #         lambda x: x[1]**(-1),
+        #         lambda x: x[2]**(-1),]
+        Phi = [lambda x, i=i: x[i] for i in range(dim)] + \
+              [lambda x, i=i: x[i]**2 for i in range(dim)] + \
+              [lambda x, i=i: x[i]**3 for i in range(dim)] + \
+              [lambda x, i=i: log(abs(x[i])) for i in range(dim)] + \
+              [lambda x, i=i: x[i]**(-1) for i in range(dim)]
     else:
         # Active Subspace
         Phi = []
