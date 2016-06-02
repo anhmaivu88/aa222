@@ -9,7 +9,7 @@ from barrier import log_barrier, inv_barrier, ext_obj
 # res = fmin_bfgs(F,x0,fprime=dF,retall=True)
 # res = (x*,Xs)
 
-def constrained_opt(F,G,x0,tol=1e-8):
+def constrained_opt(F,G,x0,tol=1e-8,it_max=1e3):
     """ Constrained Optimization via interior point method
     Usage
         xs, Fs, Gs, X, it = constrained_opt(F,G,x0)
@@ -19,12 +19,13 @@ def constrained_opt(F,G,x0,tol=1e-8):
         x0      = initial guess
     Keyword Arguments
         tol     = convergence tolerance (L2 gradient)
+        it_max  = maximum iterations
     Outputs
         xs      = optimal point
         Fs      = optimal value
         Gs      = gradient at optimal point
         X       = sequence of iterates
-        it      = iterations
+        Ft      = sequence of function values
     """
     ### Setup
     r   = 1e2       # Initial relaxation
@@ -39,23 +40,26 @@ def constrained_opt(F,G,x0,tol=1e-8):
     n   = np.size(x0)   # dim of problem
 
     ### Feasibility problem
-    # G0  = ext_obj(G,s)  # exterior objective
     G0     = lambda x: ext_obj(G(x),s)
     # Minimize G0
-    xs, X = fmin_bfgs(G0,x0,retall=True,disp=False)
+    # xs, X = fmin_bfgs(G0,x0,retall=True,disp=False)
+    # Ft = [G0(x) for x in X]
+    xs, _ = fmin_bfgs(G0,x0,retall=True,disp=False)
+    X  = np.array([xs])
+    Ft = [F(xs)+log_barrier(G(xs))/r]
     it = it + 1
 
     ### Interior point problem sequence
-    while (err > tol):      # Not converged
+    while (err > tol) and (it<it_max):  # Not converged
         # Relax the barrier
         fcn = lambda x: F(x) + log_barrier(G(x))/r
         # Enforce a tighter convergence criterion
-        # xn, Xn = fmin_bfgs(fcn,xs,retall=True,gtol=eps,epsilon=1e-8,disp=True)
-        res = fmin_bfgs(fcn,xs,retall=True,gtol=eps,epsilon=1e-8,full_output=True)
+        res = fmin_bfgs(fcn,xs,retall=True,gtol=eps,epsilon=1e-8,full_output=True,disp=False)
+        it = it+1
         xn = res[0]; Xn = res[-1]
         Gs = res[2]
-        it = it + 1 # TODO -- grab iter count from bfgs
-        X = np.append(X,Xn,axis=0)
+        X  = np.append(X,Xn,axis=0)
+        Ft = Ft + [fcn(x) for x in Xn]
         # Increment to next problem
         if r < r_max:
             r   = r * fac
@@ -70,4 +74,4 @@ def constrained_opt(F,G,x0,tol=1e-8):
 
     Fs = F(xs)
     ### Terminate
-    return xs, Fs, Gs, X, it
+    return xs, Fs, Gs, X, Ft

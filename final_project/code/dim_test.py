@@ -31,11 +31,10 @@ from get_objective import get_objective
 ##################################################
 # Parameters
 n       = int(1e2)  # monte carlo samples
-m_des   = 2         # Desired manifolds
 res_t   = 1e-3      # Absolute tolerance for residual
 iter_max= 10        # Maximum restarts for solver
 # Plot settings
-offset = [(0,500),(700,500),(1400,500)] # Plot window locations
+offset = [(0,700),(700,700),(1400,700),(2100,700)] # Plot window locations
 
 ##################################################
 # Command Line Inputs
@@ -47,10 +46,12 @@ offset = [(0,500),(700,500),(1400,500)] # Plot window locations
 
 # Problem selection
 if len(sys.argv) > 1:
-    m       = int(sys.argv[1])
+    m       = int(sys.argv[1]) # Dimension of problem
+    m_des   = m-1              # Desired manifolds
 else:
     print("Default dimension m=3 selected...")
     m       = 3         # Dimension of problem
+    m_des   = 2         # Desired manifolds
 if len(sys.argv) > 2:
     my_case = int(sys.argv[2])
 else:
@@ -85,8 +86,9 @@ M = np.array(M)
 ##################################################
 ## Active Manifold Pursuit
 ##################################################
-W, Res, it = seek_am(M, res_thresh = res_t, m_des = m_des, \
-                     verbose=True, full=True)
+W, Res, resets, Res_full, Obj_full = \
+            seek_am(M, res_thresh = res_t, m_des = m_des, \
+                    verbose=True, full=True)
 
 ##################################################
 ## Results
@@ -97,19 +99,12 @@ print "Problem Setup:"
 print "Dimensionality = {}".format(m)
 print "Objective type = {}".format(name)
 print "AM Results:"
-print "Solver resets  = {}".format(it)
+print "Solver resets  = {}".format(resets)
 print "Residuals      = \n{}".format(Res)
 print "Function param = \n{}".format(opt)
 print "Leading Vectors:"
 for i in range(m_des):
     print "W[:,"+str(i)+"] = \n{}".format(W[:,i])
-
-##################################################
-# Compare the SVD
-##################################################
-u,l,v = svd(M)
-W_svd = v.T
-Res_svd = l
 
 ##################################################
 # Plotting
@@ -118,10 +113,9 @@ Res_svd = l
 ### Residuals
 fig = plt.figure()
 plt.plot(Res,'k*')
-# plt.plot(Res_svd,'bo') # Eigenvalues from SVD
 plt.yscale('log')
-plt.xlim([-0.5,len(Res_svd)-0.5])
-plt.xticks(range(len(Res_svd)))
+plt.xlim([-0.5,len(Res)-0.5])
+plt.xticks(range(len(Res)))
 # Annotation
 plt.title("Residuals")
 plt.xlabel("Index")
@@ -149,6 +143,46 @@ plt.ylabel("Entry")
 manager = plt.get_current_fig_manager()
 x,y,dx,dy = manager.window.geometry().getRect()
 manager.window.setGeometry(offset[1][0],offset[1][1],dx,dy)
+
+### Residual sequences
+longest = 0
+res_colors  = ['b-*','r-*','g-*','k-*']
+
+fig = plt.figure()
+for i in range(len(Res_full)):
+    plt.plot(Res_full[i],res_colors[i])
+    longest = max(longest,len(Res_full[i]))
+
+plt.yscale('log')
+plt.xlim([-0.5,longest+0.5])
+# Annotation
+plt.title("Residual Sequences")
+plt.xlabel("Iteration")
+plt.ylabel("Residual")
+# Set plot location on screen
+manager = plt.get_current_fig_manager()
+x,y,dx,dy = manager.window.geometry().getRect()
+manager.window.setGeometry(offset[2][0],offset[2][1],dx,dy)
+
+### Residual sequences
+longest = 0
+obj_colors  = ['b-*','r-*','g-*','k-*']
+
+fig = plt.figure()
+for i in range(len(Obj_full)):
+    plt.plot(Obj_full[i],obj_colors[i])
+    longest = max(longest,len(Obj_full[i]))
+
+plt.yscale('log')
+plt.xlim([-0.5,longest+0.5])
+# Annotation
+plt.title("Residual Sequences")
+plt.xlabel("Iteration")
+plt.ylabel("Residual")
+# Set plot location on screen
+manager = plt.get_current_fig_manager()
+x,y,dx,dy = manager.window.geometry().getRect()
+manager.window.setGeometry(offset[3][0],offset[3][1],dx,dy)
 
 # Show all plots
 plt.show()

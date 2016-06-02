@@ -12,7 +12,7 @@ def seek_am(M,reset_max=50,res_thresh=1e-3,verbose=False,full=False,\
     sequential constrained minimization problems
     Usage
         W,Res = seek_am(M)
-        W,Res,it = seek_am(M,full=True)
+        W,Res,resets = seek_am(M,full=True)
     Arguments
         M = matrix defining problem
     Keyword Arguments
@@ -44,6 +44,7 @@ def seek_am(M,reset_max=50,res_thresh=1e-3,verbose=False,full=False,\
     ##################################################
     # Setup
     W = np.array([]); Res = []    # Reserve space
+    Res_full = []; Obj_full = []  # Optional outputs
     F = f; G = g        # Unmodified for first run
     Qc = np.eye(m)      # First parameterization
     # Initial guess for solver
@@ -56,7 +57,7 @@ def seek_am(M,reset_max=50,res_thresh=1e-3,verbose=False,full=False,\
     # for i in range(m):
     while i < m_des:
         # Solve optimization problem
-        xs, Fs, Gs, X, it = constrained_opt(F,G,x0)
+        xs, Fs, Gs, X, Ft = constrained_opt(F,G,x0)
         w = util.col(Qc.dot(xs)) # map to physical space
         res = norm(np.dot(M,w))
         # Continue if solution meets residual tolerance,
@@ -68,6 +69,11 @@ def seek_am(M,reset_max=50,res_thresh=1e-3,verbose=False,full=False,\
             else:
                 W = np.append(W,w,axis=1)
             Res.append( res )
+            # Store residual sequence for full output
+            if full==True:
+                wf = [util.col(Qc.dot(v)) for v in X]
+                Res_full.append([norm(np.dot(M,v)) for v in wf])
+                Obj_full.append(Ft)
             # Reparameterize
             if (i < m-1): # Check if last iteration
                 A = np.append(np.array(W),np.eye(m),axis=1)
@@ -86,6 +92,6 @@ def seek_am(M,reset_max=50,res_thresh=1e-3,verbose=False,full=False,\
         x0 = random([1,Qc.shape[1]])     # random guess
 
     if full:
-        return util.norm_col(W), Res, resets
+        return util.norm_col(W), Res, resets, Res_full, Obj_full
     else:
         return util.norm_col(W), Res

@@ -42,7 +42,7 @@ offset = [(0,500),(700,500),(1400,500)] # Plot window locations
 ##################################################
 # if len(sys.argv) < 2:
 #     print('Usage:')
-#     print('    python {} [grid file] [solution file]'.format(sys.argv[0]))
+#     print('    python {} [case choice] [basis choice]'.format(sys.argv[0]))
 #     exit()
 
 # Problem selection
@@ -91,8 +91,8 @@ M = np.array(M)
 ##################################################
 ## Active Manifold Pursuit
 ##################################################
-W, Res, it = seek_am(M, res_thresh = res_t, verbose=True, full=True, \
-                    m_des = m_des)
+W, Res, it = seek_am(M, res_thresh = res_t, m_des = m_des, \
+                     verbose=True, full=True)
 
 ##################################################
 ## Results
@@ -120,7 +120,7 @@ Res_svd = l
 ### Residuals
 fig = plt.figure()
 plt.plot(Res,'k*')
-plt.plot(Res_svd,'bo')
+# plt.plot(Res_svd,'bo') # Eigenvalues from SVD
 plt.yscale('log')
 plt.xlim([-0.5,len(Res_svd)-0.5])
 plt.xticks(range(len(Res_svd)))
