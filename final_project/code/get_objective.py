@@ -1,12 +1,19 @@
 import numpy as np
 from ad import gh
-from util import col
+from pyutil.numeric import col
 from random import random, randint
+from math import sqrt
 
 def rs():
     """Random scalar
     """
     return 2.*(random()-0.5)
+
+def normalize(A):
+    """Normalize a vector by the 2-Norm
+    """
+    n = sqrt(sum([a**2 for a in A]))
+    return [a/n for a in A]
 
 def get_objective(my_case,dim,full=False):
     """Return an m-dimensional objective function
@@ -17,6 +24,7 @@ def get_objective(my_case,dim,full=False):
         my_case = type of function to return:
                     0 = Single-Ridge Function
                     1 = Double-Ridge Function
+                    2 = Mixed Function
         dim     = dimension of input
     Keyword Arguments
         full    = full return flag
@@ -29,8 +37,8 @@ def get_objective(my_case,dim,full=False):
     # Double-Ridge Function
     if my_case == 1:
         # Random vector
-        A = [rs() for i in range(dim)]
-        B = [rs() for i in range(dim)]
+        A = normalize([rs() for i in range(dim)])
+        B = normalize([rs() for i in range(dim)])
         # Construct function
         fcn = lambda x: sum([x[i]*A[i] for i in range(len(A))])**2 + \
                         sum([x[i]*B[i] for i in range(len(B))])**2
@@ -44,9 +52,9 @@ def get_objective(my_case,dim,full=False):
         n = dim/2
         m = dim-n
         # Sparse random vector
-        A = [rs() for i in range(n)] + [0]*m
+        A = normalize([rs() for i in range(n)] + [0]*m)
         # Complementary sparse random vector
-        B = [0]*n + [rs() for i in range(m)]
+        B = normalize([0]*n + [rs() for i in range(m)])
         # Construct function
         fcn = lambda x: sum([x[i]*A[i] for i in range(len(A))]) + \
                         sum([x[i]**2*B[i] for i in range(len(B))])
@@ -58,9 +66,9 @@ def get_objective(my_case,dim,full=False):
     # Randomly-Mixed Function
     elif my_case == 3:
         # Sparse random vector
-        A = [rs()*randint(0,1) for i in range(dim)]
+        A = normalize([rs()*randint(0,1) for i in range(dim)])
         # Complementary sparse random vector
-        B = [(A[i]==0)*rs()*randint(0,1) for i in range(dim)]
+        B = normalize([(A[i]==0)*rs()*randint(0,1) for i in range(dim)])
         # Construct function
         fcn = lambda x: sum([x[i]*A[i] for i in range(len(A))]) + \
                         sum([x[i]**2*B[i] for i in range(len(B))])
@@ -72,7 +80,7 @@ def get_objective(my_case,dim,full=False):
     # Single-Ridge Function
     else:
         # Random vector
-        A = [rs() for i in range(dim)]
+        A = normalize([rs() for i in range(dim)])
         # Construct function
         fcn = lambda x: sum([x[i]*A[i] for i in range(len(A))])**2
         grad, _ = gh(fcn)

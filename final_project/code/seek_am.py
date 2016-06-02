@@ -12,7 +12,7 @@ def seek_am(M,reset_max=50,res_thresh=1e-3,verbose=False,full=False,\
     sequential constrained minimization problems
     Usage
         W,Res = seek_am(M)
-        W,Res,resets = seek_am(M,full=True)
+        W,Res,Resets_total, Res_full, Obj_full = seek_am(M,full=True)
     Arguments
         M = matrix defining problem
     Keyword Arguments
@@ -22,9 +22,11 @@ def seek_am(M,reset_max=50,res_thresh=1e-3,verbose=False,full=False,\
         full       = full function return
         m_des      = desired number of manifolds
     Outputs
-        W       = orthogonal matrix
-        Res     = list of residual values
-        resets  = number of resets
+        W        = orthogonal matrix
+        Res      = list of residual values
+        Resets_total  = number of resets, organized by stage
+        Res_full = Residual sequence, organized by stage
+        Obj_full = Objective sequence, organized by stage
     """
     m = M.shape[1]
     if m_des == None:
@@ -52,6 +54,7 @@ def seek_am(M,reset_max=50,res_thresh=1e-3,verbose=False,full=False,\
 
     # Main loop
     resets = 0
+    Resets_total = []
     i = 0
 
     # for i in range(m):
@@ -83,15 +86,18 @@ def seek_am(M,reset_max=50,res_thresh=1e-3,verbose=False,full=False,\
                 G = lambda alpha: g(Qc.dot(util.col(np.array(alpha))))
             # Iterate
             i += 1
+            # Reset the reset budget
+            Resets_total.append(resets)
+            resets = 0
         # Iterate the reset budget
         else:
             resets += 1
             if verbose:
-                print("Residual tolerance not reached, solver stage reset...")
+                print("res_tol not met in Stage {}, solver stage reset...".format(i))
         # New initial guess
         x0 = random([1,Qc.shape[1]])     # random guess
 
     if full:
-        return util.norm_col(W), Res, resets, Res_full, Obj_full
+        return util.norm_col(W), Res, Resets_total, Res_full, Obj_full
     else:
         return util.norm_col(W), Res

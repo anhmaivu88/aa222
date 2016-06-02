@@ -20,7 +20,8 @@ import matplotlib.pyplot as plt
 ##################################################
 from interior import constrained_opt
 from barrier import feasible
-import util
+import pyutil.numeric as util
+from pyutil.plotting import linspecer
 
 from seek_am import seek_am
 from get_basis import get_basis
@@ -31,6 +32,11 @@ from get_objective import get_objective
 ##################################################
 # Parameters
 n         = int(1e2)  # monte carlo samples
+# Default parameters
+m         = 3
+m_des     = 2
+my_base   = 0
+my_case   = 0
 res_t     = 1e-3      # Absolute tolerance for residual
 reset_max = 10        # Maximum restarts for solver
 # Plot settings
@@ -44,6 +50,16 @@ eps = np.finfo(float).eps # Machine epsilon
 if len(sys.argv) < 2:
     print('Usage:')
     print('    python {} [input file]'.format(sys.argv[0]))
+    print('Input File Format:')
+    print('    m     3 # 3-dimensional objective function')
+    print('    m_des 2 # number of desired Inactive Manifolds')
+    print('    basis 0 # choice of basis: 0 Linear, 1 Quadratic, 3 Cubic')
+    print('    case  0 # objective function: 0 Ridge, 1 Double Ridge, 2 Mixed')
+    print('    title Title_String # case title for plots,')
+    print('                       # underscores replaced with spaces')
+    print('    plot  0 # boolean flag for plotting')
+    print('    reset_max 20 # maximum solver resets')
+    print('    res_threshold 1e-3 # residual threshold for restart')
     exit()
 
 # Problem selection
@@ -61,14 +77,14 @@ if len(sys.argv) > 1:
             my_base = int(l[1])
         elif l[0].lower() == 'case':
             my_case = int(l[1])
+        elif l[0].lower() == 'reset_max':
+            reset_max = int(l[1])
+        elif l[0].lower() == 'res_threshold':
+            res_t = float(l[1])
         elif l[0].lower() == 'title':
-            title_case = l[1]
+            title_case = l[1].replace("_"," ")
         elif l[0].lower() == 'plot':
             plotting = int(l[1])
-
-# Disable plotting if dimensionality too high
-if m > 6:
-    plotting = False
 
 # Choose basis
 Phi, dPhi, basis_name, Labels = get_basis(my_base,m)
@@ -92,11 +108,24 @@ M = np.array(M)
 ##################################################
 ## Active Manifold Pursuit
 ##################################################
-W, Res, resets, Res_full, Obj_full = \
+W, Res, Resets_total, Res_full, Obj_full = \
             seek_am(M, res_thresh = res_t, m_des = m_des, reset_max = reset_max, \
                     verbose=True, full=True)
 
 sequence = [len(l) for l in Res_full]
+
+##################################################
+# Compare the SVD
+##################################################
+if my_base == 0:
+    u,l,v = svd(M)
+    W_svd = v.T
+    Res_svd = l
+    # Subspace distance
+    W_svd = W_svd[:,1:]
+    dist = util.subspace_distance(W_svd,W)
+else:
+    dist = None
 
 ##################################################
 ## Results
@@ -108,10 +137,12 @@ print "Dimensionality = {}".format(m)
 print "Basis type     = {}".format(basis_name)
 print "Objective type = {}".format(case_name)
 print "AM Results:"
-print "Solver resets  = {}".format(resets)
-print "Residuals      = \n{}".format(Res)
 print "Iter. counts   = \n{}".format(sequence)
 print "Function param = \n{}".format(opt)
+print "Solver resets  = \n{}".format(Resets_total)
+print "Residuals      = \n{}".format(Res)
+if dist != None:
+    print "Subspace Dist  = \n{}".format(dist)
 print "Leading Vectors:"
 for i in range(m_des):
     print "W[:,"+str(i)+"] = \n{}".format(W[:,i])
@@ -121,82 +152,49 @@ for i in range(m_des):
 ##################################################
 
 if plotting:
-    ### Residuals
-    # Floor the residuals on machine epsilon
-    Res = [max(Res[i],eps) for i in range(len(Res))]
-
-    fig = plt.figure()
-    plt.plot(Res,'k*')
-    plt.yscale('log')
-    plt.xlim([-0.5,len(Res)-0.5])
-    plt.xticks(range(len(Res)))
-    # Annotation
-    plt.title("Residuals")
-    plt.xlabel("Index")
-    plt.ylabel("Residual")
-    # Set plot location on screen
-    manager = plt.get_current_fig_manager()
-    x,y,dx,dy = manager.window.geometry().getRect()
-    manager.window.setGeometry(offset[0][0],offset[0][1],dx,dy)
-
-    ### Vectors
-    N   = len(W[:,0])
-    ind = np.arange(N)
-    wid = 0.35
-
-    fig = plt.figure()
-    plt.bar(ind    ,W[:,0],wid,color='b')
-    plt.bar(ind+wid,W[:,1],wid,color='r')
-    plt.xlim([-0.5,N+0.5])
-    plt.xticks(ind+wid,Labels)
-    # Annotation
-    plt.title("Vectors")
-    plt.xlabel("Index")
-    plt.ylabel("Entry")
-    # Set plot location on screen
-    manager = plt.get_current_fig_manager()
-    x,y,dx,dy = manager.window.geometry().getRect()
-    manager.window.setGeometry(offset[1][0],offset[1][1],dx,dy)
-
     ### Residual sequences
+    length = len(Res_full)
     longest = 0
-    res_colors  = ['b-*','r-*','g-*','k-*','c-*','m-*','y-*']
+    colors  = linspecer(length)
+    sty = '-'
+    mkr = 'o'
 
     fig = plt.figure()
-    for i in range(len(Res_full)):
-        plt.plot(Res_full[i],res_colors[i])
+    for i in range(length):
+        plt.plot(Res_full[i],color=colors[i],linestyle=sty,marker=mkr)
         longest = max(longest,len(Res_full[i]))
 
     plt.yscale('log')
     plt.xlim([-0.5,longest+0.5])
     # Annotation
-    plt.title("Residual Sequences")
+    plt.title("Residual Sequences: "+title_case)
     plt.xlabel("Iteration")
     plt.ylabel("Residual")
+    plt.legend(['Stage '+str(i+1) for i in range(length)])
     # Set plot location on screen
     manager = plt.get_current_fig_manager()
     x,y,dx,dy = manager.window.geometry().getRect()
-    manager.window.setGeometry(offset[2][0],offset[2][1],dx,dy)
+    manager.window.setGeometry(offset[0][0],offset[0][1],dx,dy)
 
-    ### Residual sequences
+    ### Objective sequences
     longest = 0
-    obj_colors  = ['b-*','r-*','g-*','k-*','c-*','m-*','y-*']
 
     fig = plt.figure()
-    for i in range(len(Obj_full)):
-        plt.plot(Obj_full[i],obj_colors[i])
+    for i in range(length):
+        plt.plot(Obj_full[i],color=colors[i],linestyle=sty,marker=mkr)
         longest = max(longest,len(Obj_full[i]))
 
     plt.yscale('log')
     plt.xlim([-0.5,longest+0.5])
     # Annotation
-    plt.title("Objective Sequences")
+    plt.title("Objective Sequences: "+title_case)
     plt.xlabel("Iteration")
     plt.ylabel("Residual")
+    plt.legend(['Stage '+str(i+1) for i in range(length)])
     # Set plot location on screen
     manager = plt.get_current_fig_manager()
     x,y,dx,dy = manager.window.geometry().getRect()
-    manager.window.setGeometry(offset[3][0],offset[3][1],dx,dy)
+    manager.window.setGeometry(offset[1][0],offset[1][1],dx,dy)
 
     # Show all plots
     plt.show()
