@@ -39,6 +39,30 @@ def get_basis(my_base,dim):
                  ["I_"+str(i) for i in range(dim)]
         # Gradients 
         dPhi = [gh(f)[0] for f in Phi]
+    elif my_base == 3:
+        # 2nd Order Legendre Basis
+        Phi = [lambda x, i=i: x[i] for i in range(dim)] + \
+              [lambda x, i=i: 0.5*x[i]**2 for i in range(dim)] + \
+              [lambda x, i=i: 0.5*(x[i]**3-x[i]) for i in range(dim)]
+        # Labels
+        Labels = ["P_0_"+str(i) for i in range(dim)] + \
+                 ["P_1_"+str(i) for i in range(dim)] + \
+                 ["P_2_"+str(i) for i in range(dim)]
+        # Gradients 
+        dPhi = [gh(f)[0] for f in Phi]
+    elif my_base == 4:
+        # 2nd Order Legendre Basis
+        Phi = [lambda x, i=i: x[i] for i in range(dim)] + \
+              [lambda x, i=i: 0.5*x[i]**2 for i in range(dim)] + \
+              [lambda x, i=i: 0.5*(x[i]**3-x[i]) for i in range(dim)] + \
+              [lambda x, i=i: 0.5*(5./4.*x[i]**4-3./2.*x[i]**2) for i in range(dim)]
+        # Labels
+        Labels = ["P_0_"+str(i) for i in range(dim)] + \
+                 ["P_1_"+str(i) for i in range(dim)] + \
+                 ["P_2_"+str(i) for i in range(dim)] + \
+                 ["P_3_"+str(i) for i in range(dim)]
+        # Gradients 
+        dPhi = [gh(f)[0] for f in Phi]
     else:
         # Active Subspace
         Phi = [lambda x: x[i] for i in range(dim)]
