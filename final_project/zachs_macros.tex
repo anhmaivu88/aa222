@@ -4,17 +4,19 @@
 \usepackage{amsmath} % Needed for \boldsymbol, etc.
 \usepackage{amsfonts} % Needed for \mathbb, etc.
 \usepackage{graphicx}
+\usepackage{mathtools} % Needed for \ceil and \floor
+% Break with AIAA template
 % \usepackage{caption}
 % \usepackage{subcaption}
 
 % Image Macro: \img{filename}{caption}
-\newcommand{\img}[2]{
-	\begin{figure}[H]
-	\centering
-	\includegraphics[width=0.6\textwidth]{../images/#1}   % first argument is the file
-	\caption{#2}                  % second argument is caption
-	\label{fig:#1}                % generate label from first argument
-	\end{figure} }
+% \newcommand{\img}[2]{
+% 	\begin{figure}[H]
+% 	\centering
+% 	\includegraphics[width=0.6\textwidth]{../images/#1}   % first argument is the file
+% 	\caption{#2}                  % second argument is caption
+% 	\label{fig:#1}                % generate label from first argument
+% 	\end{figure} }
 
 % Double Image Macro: \img{file1}{file2}{caption1}{caption2}
 % \newcommand{\imgtwo}[4]{
@@ -36,20 +38,25 @@
 % }
 
 % Table Macro: \tab{filename}{caption}
-\newcommand{\tab}[2]{
-	\begin{table}[H]
-	\centering
-	\input{../tables/#1.tex} 	% first argument is filename
-	\caption{#2} 				% second argument is caption
-	\label{tab:#1} 				% generatae label from filename
-	\end{table}
-}
+% \newcommand{\tab}[2]{
+% 	\begin{table}[H]
+% 	\centering
+% 	\input{../tables/#1.tex} 	% first argument is filename
+% 	\caption{#2} 				% second argument is caption
+% 	\label{tab:#1} 				% generatae label from filename
+% 	\end{table}
+% }
 
 % Logic
 \newcommand{\logeq}{\Leftrightarrow}
 
 % Probability
 \newcommand{\E}{\mathbb{E}}
+
+% Index
+% Use these in star form; i.e. \floor*{x/2}
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
 
 % Vector symbol macros
 \newcommand{\vsym}[1]{\boldsymbol{#1}}
