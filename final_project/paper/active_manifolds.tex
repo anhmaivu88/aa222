@@ -64,7 +64,7 @@ The only reasonable strategy to mitigate this challenge is to perform \emph{dime
 \mW^T\nabla f = 0 \logeq \mW^TA = 0, \label{eq:ridge_property}
 \end{equation}
 
-where $\nabla f$ is the gradient of $f$, understood to be a column vector. One example of a Ridge Function is $f(\vx) = \frac{1}{2}(.7x_1+.3x_2)^2$. In this case, the Active Subspace approach discovers the Active and Inactive directions, depicted in Figure \ref{fig:as_example}. Note that this gives us a `perfect' dimension reduction, as we can completely neglect changes along the direction $[-.3,.7]^T$. Such Ridge Functions may seem like a contrivance, but they are actually quite common in multivariate Fourier Transforms\cite{pinkus2015} and physical laws in general.\cite{Constantine2016} Nevertheless, Ridge Functions are not the only functional form that arises in practice; in this case the Active Subspace is approximate. While approximate Active Subspaces are useful in applications such as aerodynamic shape optimization\cite{lukaczyk2014}, scramjet analysis\cite{Constantine20151}, and hydrologic modeling\cite{Jefferson2015}, it is easy to construct functions which do not admit this sort of low-dimensional structure, even in an approximate sense. In these cases, we would like to do more than simply give up.
+where $\mW$ is an $m\times d$ matrix, and $\nabla f$ is the gradient of $f$, understood to be a column vector. One example of a Ridge Function is $f(\vx) = \frac{1}{2}(.7x_1+.3x_2)^2$. In this case, the Active Subspace approach discovers the Active and Inactive directions, depicted in Figure \ref{fig:as_example}. Note that this gives us a `perfect' dimension reduction, as we can completely neglect changes along the direction $[-.3,.7]^T$. Such Ridge Functions may seem like a contrivance, but they are actually quite common in multivariate Fourier Transforms\cite{pinkus2015} and physical laws in general.\cite{Constantine2016} Nevertheless, Ridge Functions are not the only functional form that arises in practice. In these cases the Active Subspace is approximate. While approximate Active Subspaces are useful in applications such as aerodynamic shape optimization\cite{lukaczyk2014}, scramjet analysis\cite{Constantine20151}, and hydrologic modeling\cite{Jefferson2015}, it is easy to construct functions which do not admit this sort of low-dimensional structure, even in an approximate sense. In these cases, we would like to do more than simply give up.
 
 \begin{wrapfigure}{R}{0.5\linewidth}
  \includegraphics{../images/curse_of_dimensionality}
@@ -96,7 +96,7 @@ The strategy we will adopt in this work is to generalize the properties of a Rid
 \nomenclature{$\nabla f(\vx)$}{Gradient of QoI}%
 \nomenclature{$\mW(\vx)$}{Manifold matrix}%
 
-Equation \ref{eq:inactive_manifold} gives us a set of directions $\mW(\vx)$ along which $f(\vx)$ does not vary -- these directions define \emph{Inactive Manifolds}, while the orthogonal directions define \emph{Active Manifolds}. Note that as long as $f(\vx)$ is differentiable, we know $\mW(\vx)$ exists, as we can simply perform a QR decomposition on the gradient $\nabla f$ augmented with the $m\times m$ identity matrix. While this is mathematically possible, such a scheme is computationally intractable, as it is an infinite dimensional problem. Instead, we must settle on a finite dimensional problem by approximating Equation \ref{eq:inactive_manifold}.
+Equation \ref{eq:inactive_manifold} gives us a set of directions $\mW(\vx)$ along which $f(\vx)$ does not vary -- these directions define \emph{Inactive Manifolds}, while the orthogonal directions define \emph{Active Manifolds}. Note that as long as $f(\vx)$ is differentiable we know $\mW(\vx)$ exists, as we can simply perform a QR decomposition on the gradient $\nabla f$ augmented with the $m\times m$ identity matrix. While this is mathematically possible, such a scheme is computationally intractable, as it is an infinite dimensional problem. Instead, we must settle on a finite dimensional problem by approximating Equation \ref{eq:inactive_manifold}.
 
 First, we will consider a single direction $\vw_j(\vx)$, and parameterize on a finite number of basis functions. Choose a set of $k$ differentiable functions $\phi_i:\mathbb{R}^m\to\mathbb{R}$, and set
 
@@ -115,7 +115,7 @@ where the $\alpha_{ij}$ parameterize $\vw_j(\vx)$ in a linear fashion. Now we co
 \mW(\vx) = [\vw_1(\vx),\dots,\vw_l(\vx)].
 \end{equation}
 
-Rather than attempt to solve for $\mW$ all at once, we will attempt to enforce Equation \ref{eq:inactive_manifold} for each $\vw_j(\vx)$ individually. We must make two concessions though. First, even though the $\vw_j$ are now parameterized on a finite set, Equation \ref{eq:inactive_manifold} is enforced at all points $\vx\in\dom$: In practice we must sample a number of points $\{\vx_i\}_{i=1}^n\subseteq\dom$ and enforce $\vw_j^T(\vx_i)\nabla f(\vx_i)=0$ on this set. Second, unless $\mW$ lies precisely within the span of the $\nabla\phi_i$, Equation \ref{eq:inactive_manifold} will hold only approximately: In practice we will attempt to minimize the residual, defined by
+Rather than attempt to solve for $\mW$ all at once, we will attempt to enforce Equation \ref{eq:inactive_manifold} for each $\vw_j(\vx)$ individually. We must make two concessions though. First, even though the $\vw_j$ are now parameterized on a finite set, Equation \ref{eq:inactive_manifold} is enforced at all points $\vx\in\dom$: In practice we must sample a number of points $\{\vx_i\}_{i=1}^n\subseteq\dom$ and enforce $\vw_j^T(\vx_i)\nabla f(\vx_i)=0$ on this set. Second, unless $\mW(\vx)$ lies precisely within the span of the $\nabla\phi_i$, Equation \ref{eq:inactive_manifold} will hold only approximately: In practice we will attempt to minimize the residual, defined by
 \nomenclature{$n$}{Number of sample points in $\dom$}%
 
 \begin{equation}
@@ -146,7 +146,7 @@ Note that if $\mM\vsym{\alpha}=0$, then Equation \ref{eq:inactive_manifold} hold
 \end{aligned}
 \end{equation}
 
-for $j=1,\dots,d$, where $\beta>0$ is a tunable weighting parameter, and $\mA_j=[\vsym{\alpha}_1,\dots,\vsym{\alpha}_{j-1}]$, with $\mA_1=0$. There are a few important points to note: First, one should set $d$ equal to the number of Inactive Manifolds sought -- one could either define a fixed number of manifolds to seek, or continue running until the residual cannot be reduced under some desired tolerance. The former method is appropriate if the degree of dimension reduction required is already known, while the latter will discover the maximum reduction available, subject to the choice of basis. Second, Problem \ref{eq:optimization} has a convex objective function but a nonlinear constraint, thus we do \emph{not} enjoy the benefits of a convex problem. This creates issues when attempting to design a solver, which will be addressed in Section \ref{sec:solver}:\ref{sec:solver_design}.
+for $j=1,\dots,d$, where $\beta>0$ is a tunable weighting parameter (in practice $\beta=1$), and $\mA_j=[\vsym{\alpha}_1,\dots,\vsym{\alpha}_{j-1}]$, with $\mA_1=0$. There are a few important points to note: First, one should set $d$ equal to the number of Inactive Manifolds sought -- one could either define a fixed number of manifolds to seek, or continue running until the residual cannot be reduced under some desired tolerance. The former method is appropriate if the degree of dimension reduction required is already known, while the latter will discover the maximum reduction available, subject to the choice of basis. Second, Problem \ref{eq:optimization} has a convex objective function but a nonlinear constraint, thus we do \emph{not} enjoy the benefits of a convex problem. This creates issues when attempting to design a solver, which will be addressed in Section \ref{sec:solver}:\ref{sec:solver_design}.
 
 %------------------------
 \subsection{Choice of Basis} \label{sec:basis}
@@ -217,7 +217,7 @@ where $\vtlm{\alpha}\in\mathbb{R}^{k-j+1}$, and $\tilde{\mQ}_j$ is found by taki
 [\mA_j,\mI] = \mQ\mR.
 \end{equation}
 
-Through this scheme, subsequent vectors are guaranteed to be orthogonal to numerical precision. However, note that since the QR decomposition has a complexity of $O(n^3)$, this method is inappropriate for excessively high-dimensional spaces. In these cases, it may be prudent to approximate the linear constraint with a barrier function. However, it is worth noting that since the computational cost we are trying to alleviate is exponential, a cubic cost may still be comparatively cheap.
+Through this scheme, subsequent vectors are guaranteed to be orthogonal to numerical precision, contingent on the performance of QR. However, note that since the QR decomposition has a complexity of $O(n^3)$, this method is inappropriate for excessively high-dimensional spaces. In these cases, it may be prudent to approximate the linear constraint with a barrier function. However, it is worth noting that since the computational cost we are trying to alleviate is exponential, a cubic cost may still be comparatively cheap.
 
 Finally, we must address the lack of convexity in our optimization problem. Problem \ref{eq:optimization} is non-convex, and thus may contain local minima. This is problematic with our interior point method, which for a poor choice of initial guess may converge to such a local optimum. To alleviate this issue, we employ a restart heuristic: We begin with a uniform random guess within a unit box in the positive orthant, and if at any stage $j$ the residual (Eq. \ref{eq:residual}) does not drop below an absolute threshold, we restart that stage with a new initial guess. This is an admittedly simple solution, which is not guaranteed to solve the problem, but it works well enough in practice.
 
@@ -239,7 +239,7 @@ f(\vx)=(a_1x_1+\dots+a_{\floor*{m/2}}x_{\floor*{m/2}}+a_{\floor*{m/2}+1}x_{\floo
 
 where as before $\va$ is a random vector. Thus Equation \ref{eq:mixed_function} is `mixed' in the sense that it has multiple types of terms. Note that the Linear basis can recover the Inactive Subspace of a Ridge Function exactly, while the Quadratic basis can exactly recover the Inactive Manifolds of a Mixed Function. This was intentional; we leave the study of approximate Active Manifolds to a future work. 
 
-In addition to a family of objective function, for each test case we fix the dimension of the objective function $m$, and the number of Inactive Manifolds sought $d$. In each case $d$ was chosen to maximize the dimension reduction. A residual threshold of $R_t=10^{-4}$ was set for the reset criteria, and $8$ resets per stage were allowed. The $\vx_i$ are sampled uniform randomly from the unit hypercube on $\mathbb{R}^m$, and in each case a fixed number of $200$ samples are taken. After the number of resets is exceeded, the best run of the stage is taken, and the stage advanced.
+Additionally, for each test case we fix the dimension of the objective function $m$, and the number of Inactive Manifolds sought $d$. In each case $d$ was chosen to maximize the dimension reduction. A residual threshold of $R_t=10^{-4}$ was set for the reset criteria, and $8$ resets per stage were allowed. After the number of resets is exceeded, the best run of the stage is taken, and the stage advanced. The $\vx_i$ are sampled uniform randomly from the unit hypercube on $\mathbb{R}^m$, and in each case a fixed number of $200$ samples are taken.
 
 \begin{table}
 \centering
@@ -257,7 +257,7 @@ $4$ & Mixed Function & $m=10$ & 9 \\
 \label{tab:tests}
 \end{table}
 
-As mentioned in Section \ref{sec:active_manifolds}:\ref{sec:basis}, the choice of a linear basis recovers Active Subspaces, thus our first test was to determine if the solver could recover this behavior. Figures \ref{fig:residual_case1} and \ref{fig:objective_case1} show the results of studying Case 1: a three-dimensional ($m=3$) Ridge Function with a one-dimensional Active Subspace.
+As mentioned in Section \ref{sec:active_manifolds}:\ref{sec:basis}, the choice of a linear basis recovers Active Subspaces, thus our first test was to determine if the solver could recover this behavior. Figures \ref{fig:residual_case1} and \ref{fig:objective_case1} show the results of studying Test Case 1: A three-dimensional ($m=3$) Ridge Function with a one-dimensional Active Subspace.
 
 \begin{figure}[!ht]
 \centering
@@ -275,7 +275,7 @@ As mentioned in Section \ref{sec:active_manifolds}:\ref{sec:basis}, the choice o
 \end{minipage}
 \end{figure}
 
-Figures \ref{fig:residual_case1} and \ref{fig:objective_case1} are typical results when studying such a Ridge Function; we see the rapid convergence rate of quasi-Newton's method in both convergence metrics. Since the residual measures the degree to which Equation \ref{eq:inactive_manifold} holds and $R$ is reaching machine zero for this case, this provides strong evidence that the solver is finding the correct Active Subspace. We can further verify this result by checking the subspace distance between the subspace found via our solver, and the Inactive Subspace found via the usual procedure (definition provided in the Appendix). In the case depicted above, the subspace distance is $\text{Dist}(\mW_{\text{solver}},\mW_{\text{AS}})=1.0786\times10^{-9}$; clearly, the two subspaces are the same to working precision.
+Figures \ref{fig:residual_case1} and \ref{fig:objective_case1} are typical results when studying such a Ridge Function; we see the rapid convergence rate of quasi-Newton's method in both convergence metrics. Since the residual measures the degree to which Equation \ref{eq:inactive_manifold} holds and $R$ is reaching machine zero for this case, this provides strong evidence that the solver is finding the correct Inactive Subspace. We can further verify this result by checking the subspace distance between the subspace found via our solver, and the Inactive Subspace found via the usual procedure (definition provided in the Appendix). In the case depicted above, the subspace distance is $\text{Dist}(\mW_{\text{solver}},\mW_{\text{AS}})=1.0786\times10^{-9}$; clearly, the two subspaces are the same to working precision.
 
 Since our solver uses a random initial guess, the solver performance is a random variable. Some runs of the solver give abberant behavior, depicted below. Note that the convergence sequences depicted in Figures \ref{fig:residual_linear_long} and \ref{fig:objective_linear_long} do not qualitatively match; this demonstrates the importance of checking both the residual and objective values. Since the objective is a mixture of both the residual and log-barriers, it is not representative of the true quantity we are attempting to minimize.
 
@@ -295,21 +295,20 @@ Since our solver uses a random initial guess, the solver performance is a random
 \end{minipage}
 \end{figure}
 
-\newpage
-One final remark is that -- in general -- the number of iterations required by the solver increases with the dimensionality of both the problem and the basis. This dependence is shown in Figures \ref{fig:count_linear_basis_ridge_objective} and \ref{fig:count_quadratic_basis_mixed_objective}. These figures are produced by running test cases identical to those noted in Table \ref{tab:tests}, except for varying $m$. Note that the computational growth rate is slowing with increasing dimension, which is an attractive feature of the process. Note also that for each of these test cases, a \emph{fixed} number of samples $\vx_i$ are evaluated on $f$; thus the figures imply that we can get away with a relatively unchanged number of expensive samples, so long as we work harder on the optimization problem. This is precisely what we would like to see from a dimension reduction technique -- if we can offload evaluations of $f$ to some other process, then we can significantly accelerate our computational studies. The precise dependence on the number of samples $\vx_i$ is critical, and a definite candidate for future work.
+One final remark is that the number of iterations required by the solver increases with the dimensionality of both the problem and the basis. This dependence is shown in Figures \ref{fig:count_linear_basis_ridge_objective} and \ref{fig:count_quadratic_basis_mixed_objective}. These figures are produced by running test cases identical to those noted in Table \ref{tab:tests}, except for varying $m$. Note that the computational growth rate is slowing with increasing dimension, which is an attractive feature of the process. Note also that for each of these test cases, a \emph{fixed} number of samples $\vx_i$ are evaluated on $f$; thus the figures imply that we can get away with a relatively unchanged number of expensive samples, so long as we work harder on the optimization problem. This is precisely what we would like to see from a dimension reduction technique -- if we can offload evaluations of $f$ to some other process, then we can significantly accelerate our computational studies. The precise dependence on the number of samples $\vx_i$ is critical, and a definite candidate for future work.
 
 \begin{figure}[!ht]
 \centering
 \begin{minipage}{.50\textwidth}
  \centering
  \includegraphics[width=.8\textwidth]{../images/count_linear_basis_ridge_objective}
- \caption{Average iteration count over $10$ runs for a Ridge Function objective with a linear basis.}
+ \caption{Average iteration count (over $10$ runs) for a Ridge Function objective with a linear basis.}
  \label{fig:count_linear_basis_ridge_objective}
 \end{minipage}%
 \begin{minipage}{.50\textwidth}
  \centering
  \includegraphics[width=.8\textwidth]{../images/count_quadratic_basis_mixed_objective}
- \caption{Average iteration count over $10$ runs for a Mixed Function objective with a quadratic basis.}
+ \caption{Average iteration count (over $10$ runs) for a Mixed Function objective with a quadratic basis.}
  \label{fig:count_quadratic_basis_mixed_objective}
 \end{minipage}
 \end{figure}
@@ -321,15 +320,22 @@ The remaining convergence plots are qualitatively similar, and are thus relegate
 \section{Conclusion and Future Work} \label{sec:conclusion}
 %-------------------------------------------------
 
-Concluding remarks, yo.
+In this work, the problem of finding Active Manifolds was posed as a nonlinear optimization problem of finding Inactive Manifolds, and a solver was designed and tested to solve this problem. The solver was tested on a number of different cases, and favorable results were shown. Our results show that seeking Active Manifolds in this fashion is a potentially fruitful line of inquiry. However, many unsolved issues remain.
 
-% Modify solver to use more information about the residual, rather than just the barrier-adjusted objective
+First, it is important to point out the limitations of our studies to date. All of the Test Cases posed above were well suited to our choice of basis; for our other unpublished tests on objective functions outside these basis sets, the method fails spectacularly. Namely, the Linear Basis is able to recover the Active Subspace, but the introduction of additional basis functions `drowns out' the Active Subspace, and the residuals fail to converge. The notion of what makes for a good basis in this context is a crucial issue which must be solved.
+
+Second, the robustness of the solver must be improved. Occasionally, the solver restart heuristic will fail to find a good initial guess, and the issue will cascade to subsequent stages. A better method is needed. Particularly, a strategy well-adapted to local minima is necessary to overcome our solver issues. A potential extension would be to add a cross-entropy stage to find a good initial guess, then leverage our existing quasi-Newton solver for fast convergence to the optimal point.\cite{Rubinstein2005}
+
+Finally, the dependence on samples of $\vx_i$ and the numer of evaluations of $f$ is of critical importance. Our work here suggests that the cost in $f$ may not be very large, though further studies are absolutely necessary. Most importantly, the case of approximate Active Manifolds has not been addressed here; in this case, the cost in $f$ may scale more strongly. This is a critical area of future work.
+
 % Study what makes a `good' sample of $\vx_i$, how many samples are needed.
+% Better restart heuristic
 
 % produces the bibliography section when processed by BibTeX
 \bibliography{bibtex_database}
 \bibliographystyle{aiaa}
 
+\newpage
 %-------------------------------------------------
 \section{Appendix} \label{sec:appendix}
 %-------------------------------------------------
@@ -342,20 +348,20 @@ The distance between subspaces measures the distance between the ranges of two d
 \end{equation}
 
 \subsection{Convergence Plots}
-Here is the full set of convergence plots for every Case study.
+Here is the full set of convergence plots for every Test Case study.
 
 \begin{figure}[!ht]
 \centering
 \begin{minipage}{.50\textwidth}
  \centering
  \includegraphics[width=.8\textwidth]{../images/residual_case1}
- \caption{Residual sequence for Case 1.}
+ \caption{Residual sequence for Test Case 1.}
  \label{fig:residual_case1}
 \end{minipage}%
 \begin{minipage}{.50\textwidth}
  \centering
  \includegraphics[width=.8\textwidth]{../images/objective_case1}
- \caption{Objective sequence for Case 1.}
+ \caption{Objective sequence for Test Case 1.}
  \label{fig:objective_case1}
 \end{minipage}
 \end{figure}
@@ -365,13 +371,13 @@ Here is the full set of convergence plots for every Case study.
 \begin{minipage}{.50\textwidth}
  \centering
  \includegraphics[width=.8\textwidth]{../images/residual_case2}
- \caption{Residual sequence for Case 2.}
+ \caption{Residual sequence for Test Case 2.}
  \label{fig:residual_case2}
 \end{minipage}%
 \begin{minipage}{.50\textwidth}
  \centering
  \includegraphics[width=.8\textwidth]{../images/objective_case2}
- \caption{Objective sequence for Case 2.}
+ \caption{Objective sequence for Test Case 2.}
  \label{fig:objective_case2}
 \end{minipage}
 \end{figure}
@@ -381,13 +387,13 @@ Here is the full set of convergence plots for every Case study.
 \begin{minipage}{.50\textwidth}
  \centering
  \includegraphics[width=.8\textwidth]{../images/residual_case3}
- \caption{Residual sequence for Case 3.}
+ \caption{Residual sequence for Test Case 3.}
  \label{fig:residual_case3}
 \end{minipage}%
 \begin{minipage}{.50\textwidth}
  \centering
  \includegraphics[width=.8\textwidth]{../images/objective_case3}
- \caption{Objective sequence for Case 3.}
+ \caption{Objective sequence for Test Case 3.}
  \label{fig:objective_case3}
 \end{minipage}
 \end{figure}
@@ -397,13 +403,13 @@ Here is the full set of convergence plots for every Case study.
 \begin{minipage}{.50\textwidth}
  \centering
  \includegraphics[width=.8\textwidth]{../images/residual_case4}
- \caption{Residual sequence for Case 4.}
+ \caption{Residual sequence for Test Case 4.}
  \label{fig:residual_case4}
 \end{minipage}%
 \begin{minipage}{.50\textwidth}
  \centering
  \includegraphics[width=.8\textwidth]{../images/objective_case4}
- \caption{Objective sequence for Case 4.}
+ \caption{Objective sequence for Test Case 4.}
  \label{fig:objective_case4}
 \end{minipage}
 \end{figure}
