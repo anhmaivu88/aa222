@@ -52,6 +52,10 @@ def seek_am(M,reset_max=50,res_thresh=1e-3,verbose=False,full=False,\
     # Initial guess for solver
     x0 = random([1,Qc.shape[1]])     # random guess
 
+    # Temporary values: best in stage
+    wb = None; Wb = None; Rb = None; Ob = None; 
+    res_b = float('inf');
+
     # Main loop
     resets = 0
     Resets_total = []
@@ -59,20 +63,25 @@ def seek_am(M,reset_max=50,res_thresh=1e-3,verbose=False,full=False,\
 
     # for i in range(m):
     while i < m_des:
-        # Solve optimization problem
+        ##################################################
+        ### Solve optimization problem
+        ##################################################
         xs, Fs, Gs, X, Ft = constrained_opt(F,G,x0)
         w = util.col(Qc.dot(xs)) # map to physical space
         res = norm(np.dot(M,w))
-        # Continue if solution meets residual tolerance,
-        # or we're out of reset budget
-        if (res < res_thresh) or (resets >= reset_max):
+
+        ##################################################
+        ### Stage Logic
+        ##################################################
+        # Met residual tolerance: store, reparameterize, and iterate
+        if (res < res_thresh):
             # Store results
             if W.shape==(0,):
                 W = w
             else:
                 W = np.append(W,w,axis=1)
             Res.append( res )
-            # Store residual sequence for full output
+            # Store residual and objective sequences for full output
             if full==True:
                 wf = [util.col(Qc.dot(v)) for v in X]
                 Res_full.append([norm(np.dot(M,v)) for v in wf])
@@ -84,16 +93,59 @@ def seek_am(M,reset_max=50,res_thresh=1e-3,verbose=False,full=False,\
                 Qc = util.col(Q[:,i+1:])
                 F = lambda alpha: f(Qc.dot(util.col(np.array(alpha))))
                 G = lambda alpha: g(Qc.dot(util.col(np.array(alpha))))
-            # Iterate
+            # Move to next stage
             i += 1
             # Reset the reset budget
             Resets_total.append(resets)
             resets = 0
-        # Iterate the reset budget
+            # Reset the best residual
+            res_b = float('inf');
+
+        # Out of resets: recall best run, reparameterize, and iterate
+        elif (resets >= reset_max):
+            # Verbose output
+            if verbose:
+                print("res_tol not met in Stage {}, advancing with best stage result...".format(i))
+            # Move forward with our best attempt
+            if W.shape==(0,):
+                W = wb
+            else:
+                W = np.append(W,wb,axis=1)
+            # Store residual and objective sequences for full output
+            if full==True:
+                Res_full.append(Rb)
+                Obj_full.append(Ob)
+            # Reparameterize
+            if (i < m-1): # Check if last iteration
+                A = np.append(np.array(W),np.eye(m),axis=1)
+                Q,R = qr(A,mode='economic')
+                Qc = util.col(Q[:,i+1:])
+                F = lambda alpha: f(Qc.dot(util.col(np.array(alpha))))
+                G = lambda alpha: g(Qc.dot(util.col(np.array(alpha))))
+            # Move to next stage
+            i += 1 
+            # Reset the reset budget
+            Resets_total.append(resets)
+            resets = 0
+            # Reset the best residual
+            res_b = float('inf');
+
+        # Reset stage
         else:
-            resets += 1
+            # Verbose output
             if verbose:
                 print("res_tol not met in Stage {}, solver stage reset...".format(i))
+            # Store if we did better than before
+            if res < res_b:
+                wb = w
+                if full==True:
+                    wf = [util.col(Qc.dot(v)) for v in X]
+                    Rb = [norm(np.dot(M,v)) for v in wf]
+                    Ob = Ft
+                res_b = res
+            # Iterate the reset counter
+            resets += 1
+
         # New initial guess
         x0 = random([1,Qc.shape[1]])     # random guess
 
