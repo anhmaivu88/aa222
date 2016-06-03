@@ -146,7 +146,7 @@ Note that if $\mM\vsym{\alpha}=0$, then Equation \ref{eq:inactive_manifold} hold
 \end{aligned}
 \end{equation}
 
-for $j=1,\dots,d$, where $\beta>0$ is a tunable weighting parameter, and $\mA_j=[\vsym{\alpha}_1,\dots,\vsym{\alpha}_{j-1}]$, with $\mA_1=0$. There are a few important points to note: First, one should set $d$ equal to the number of Inactive Manifolds sought -- one could either define a fixed number of manifolds to seek, or continue running until the residual cannot be reduced under some desired tolerance. The former method is appropriate if the degree of dimension reduction required is already known, while the latter will discover the maximum reduction available, subject to the choice of basis. Second, Problem \ref{eq:optimization} has a convex objective function but a nonlinear constraint, thus we do \emph{not} enjoy the benefits of a convex problem. This creates issues when attempting to design a solver, which will be addressed in Section \ref{sec:solver}\ref{sec:solver_design}.
+for $j=1,\dots,d$, where $\beta>0$ is a tunable weighting parameter, and $\mA_j=[\vsym{\alpha}_1,\dots,\vsym{\alpha}_{j-1}]$, with $\mA_1=0$. There are a few important points to note: First, one should set $d$ equal to the number of Inactive Manifolds sought -- one could either define a fixed number of manifolds to seek, or continue running until the residual cannot be reduced under some desired tolerance. The former method is appropriate if the degree of dimension reduction required is already known, while the latter will discover the maximum reduction available, subject to the choice of basis. Second, Problem \ref{eq:optimization} has a convex objective function but a nonlinear constraint, thus we do \emph{not} enjoy the benefits of a convex problem. This creates issues when attempting to design a solver, which will be addressed in Section \ref{sec:solver}:\ref{sec:solver_design}.
 
 %------------------------
 \subsection{Choice of Basis} \label{sec:basis}
@@ -186,7 +186,7 @@ Quadratic & $x_i$, $x_i^2$, $\log(|x_i|)$ \\
 Cubic & $x_i$, $x_i^2$, $x_i^3$, $\log(|x_i|)$, $x_i^{-1}$ \\
 \bottomrule
 \end{tabular}
-\caption{Basis sets used in numerical experiments.}
+\caption{Basis sets used in numerical experiments. Note that each basis function is used in each dimension; thus for $m=3$, the Quadratic set has $9$ basis functions.}
 \label{tab:basis}
 \end{table}
 
@@ -218,28 +218,178 @@ where $\vtlm{\alpha}\in\mathbb{R}^{k-j+1}$, and $\tilde{\mQ}_j$ is found by taki
 [\mA_j,\mI] = \mQ\mR.
 \end{equation}
 
-Note that since the QR decomposition has a complexity of $O(n^3)$, this method is inappropriate for excessively high-dimensional spaces. In these cases, it may be prudent to approximate the linear constraint with a barrier function. However, it is worth noting that since the computational cost we are trying to alleviate is exponential, a cubic cost may still be comparatively cheap.
+Through this scheme, subsequent vectors are guaranteed to be orthogonal to numerical precision. However, note that since the QR decomposition has a complexity of $O(n^3)$, this method is inappropriate for excessively high-dimensional spaces. In these cases, it may be prudent to approximate the linear constraint with a barrier function. However, it is worth noting that since the computational cost we are trying to alleviate is exponential, a cubic cost may still be comparatively cheap.
 
 Finally, we must address the lack of convexity in our optimization problem. Problem \ref{eq:optimization} is non-convex, and thus may contain local minima. This is problematic with our interior point method, which for a poor choice of initial guess may converge to such a local optimum. To alleviate this issue, we employ a restart heuristic: We begin with a uniform random guess within a unit box in the positive orthant, and if at any stage $j$ the residual (Eq. \ref{eq:residual}) does not drop below an absolute threshold, we restart that stage with a new initial guess. This is an admittedly simple solution, which is not guaranteed to solve the problem, but it works well enough in practice.
 
 %------------------------
 \subsection{Solver Performance} \label{sec:solver_performance}
+The solver described above was evaluated on a number of different test cases in order to determine its efficacy. These test cases are summarized in Table \ref{tab:tests}. Note that a Ridge Function in this case is a function of the form 
 
-% Convergence in Residual
+\begin{equation}
+\label{eq:ridge_function}
+f(\vx)=(\va^T\vx)^2, 
+\end{equation}
 
-% Comparison against Active Subspaces for Ridge Function
+where $\va$ is a random vector of unit length. A `Mixed Function' is a function of the form 
 
-% Comparison against AS for quadratic function
+\begin{equation}
+\label{eq:mixed_function}
+f(\vx)=(a_1x_1+\dots+a_{\floor*{m/2}}x_{\floor*{m/2}}+a_{\floor*{m/2}+1}x_{\floor*{m/2}+1}^2+\dots+a_mx_m^2),
+\end{equation}
+
+where as before $\va$ is a random vector. Thus Equation \ref{eq:mixed_function} is `mixed' in the sense that it has multiple types of terms. In addition to a family of objective function, for each test case we fix the dimension of the objective function $m$, and the number of Inactive Manifolds sought $d$. In each case $d$ was chosen to maximize the dimension reduction. A residual threshold of $R_t=10^{-4}$ was set for the reset criteria, and $8$ resets per stage were allowed. The $\vx_i$ are sampled uniform randomly from the unit hypercube on $\mathbb{R}^m$, and in each case a fixed number of $200$ samples are taken. After the number of resets is exceeded, the best run of the stage is taken, and the stage advanced.
+
+\begin{table}
+\centering
+\begin{tabular}{llll}
+\toprule
+Test Case & Quantity of Interest & Dimension & $d$\\
+\midrule
+$1$ & Ridge Function & $m=3$ & 2 \\
+$2$ & Ridge Function & $m=10$ & 9 \\
+$3$ & Mixed Function & $m=3$ & 2 \\
+$4$ & Mixed Function & $m=10$ & 9 \\
+\bottomrule
+\end{tabular}
+\caption{Test cases used to evaluate solver.}
+\label{tab:tests}
+\end{table}
+
+As mentioned in Section \ref{sec:active_manifolds}:\ref{sec:basis}, the choice of a linear basis recovers Active Subspaces, thus our first test was to determine if the solver could recover this behavior. Figures \ref{fig:residual_case1} and \ref{fig:objective_case1} show the results of studying Case 1: a three-dimensional ($m=3$) Ridge Function with a one-dimensional Active Subspace.
+
+\begin{figure}[!ht]
+\centering
+\begin{minipage}{.50\textwidth}
+ \centering
+ \includegraphics[width=.8\textwidth]{../images/residual_case1}
+ \caption{Typical residual sequence for Test Case 1.}
+ \label{fig:residual_case1}
+\end{minipage}%
+\begin{minipage}{.50\textwidth}
+ \centering
+ \includegraphics[width=.8\textwidth]{../images/objective_case1}
+ \caption{Typical objective sequence for Test Case 1.}
+ \label{fig:objective_case1}
+\end{minipage}
+\end{figure}
+
+Figures \ref{fig:residual_case1} and \ref{fig:objective_case1} are typical results when studying such a Ridge Function; we see the rapid convergence rate of quasi-Newton's method in both convergence metrics. Since the residual measures the degree to which Equation \ref{eq:inactive_manifold} holds and $R$ is reaching machine zero for this case, this provides strong evidence that the solver is finding the correct Active Subspace. We can further verify this result by checking the subspace distance between the subspace found via our solver, and the Inactive Subspace found via the usual procedure (definition provided in the Appendix). In the case depicted above, the subspace distance is $\text{Dist}(\mW_{\text{solver}},\mW_{\text{AS}})=1.0786\times10^{-9}$; clearly, the two subspaces are the same to working precision.
+
+Since our solver uses a random initial guess, the solver performance is a random variable. Some runs of the solver give abberant behavior, depicted below. Note that the convergence sequences depicted in Figures \ref{fig:residual_linear_long} and \ref{fig:objective_linear_long} do not qualitatively match; this demonstrates the importance of checking both the residual and objective values. Since the objective is a mixture of both the residual and log-barriers, it is not representative of the true quantity we are attempting to minimize.
+
+\begin{figure}[!ht]
+\centering
+\begin{minipage}{.50\textwidth}
+ \centering
+ \includegraphics[width=.8\textwidth]{../images/residual_linear_long}
+ \caption{Abberant residual sequence for Test Case 1.}
+ \label{fig:residual_linear_long}
+\end{minipage}%
+\begin{minipage}{.50\textwidth}
+ \centering
+ \includegraphics[width=.8\textwidth]{../images/objective_linear_long}
+ \caption{Abberant objective sequence for Test Case 1.}
+ \label{fig:objective_linear_long}
+\end{minipage}
+\end{figure}
+
+One final remark is that -- in general -- the number of iterations required by the solver increases with the dimensionality of both the problem and the basis. This dependence is shown in Figure ?. (Comment on the dependence) Note that for each of these test cases, a \emph{fixed} number of samples $\vx_i$ are evaluated on $f$; thus Figure ? implies that we can get away with a relatively unchanged number of expensive samples, so long as we work harder on the optimization problem. (Does it?) This is precisely what we would like to see from a dimension reduction technique -- if we can offload evaluations of $f$ to some other process, then we can significantly accelerate our computational studies. This dependence on the number of samples $\vx_i$ is critical, and a definite candidate for future work.
+
+% Average iterations required vs dimensionality
+
+The remaining convergence plots are qualitatively similar, and are thus relegated to the Appendix.
 
 %-------------------------------------------------
-\section{Conclusion} \label{sec:conclusion}
+\section{Conclusion and Future Work} \label{sec:conclusion}
 %-------------------------------------------------
 
 Concluding remarks, yo.
 
+% Modify solver to use more information about the residual, rather than just the barrier-adjusted objective
+% Study what makes a `good' sample of $\vx_i$, how many samples are needed.
+
 % produces the bibliography section when processed by BibTeX
 \bibliography{bibtex_database}
 \bibliographystyle{aiaa}
+
+%-------------------------------------------------
+\section{Appendix} \label{sec:appendix}
+%-------------------------------------------------
+\subsection{Subspace Distance}
+The distance between subspaces measures the distance between the ranges of two different linear subspaces, and is defined\cite{constantine2015}
+
+\begin{equation}
+\label{eq:subspace_distance}
+\text{Dist}(\mW_1,\mW_2) = \|\mW_1\mW_1^T - \mW_2\mW_2^T\|_2.
+\end{equation}
+
+\subsection{Convergence Plots}
+Here is the full set of convergence plots for every Case study.
+
+\begin{figure}[!ht]
+\centering
+\begin{minipage}{.50\textwidth}
+ \centering
+ \includegraphics[width=.8\textwidth]{../images/residual_case1}
+ \caption{Residual sequence for Case 1.}
+ \label{fig:residual_case1}
+\end{minipage}%
+\begin{minipage}{.50\textwidth}
+ \centering
+ \includegraphics[width=.8\textwidth]{../images/objective_case1}
+ \caption{Objective sequence for Case 1.}
+ \label{fig:objective_case1}
+\end{minipage}
+\end{figure}
+
+\begin{figure}[!ht]
+\centering
+\begin{minipage}{.50\textwidth}
+ \centering
+ \includegraphics[width=.8\textwidth]{../images/residual_case2}
+ \caption{Residual sequence for Case 2.}
+ \label{fig:residual_case2}
+\end{minipage}%
+\begin{minipage}{.50\textwidth}
+ \centering
+ \includegraphics[width=.8\textwidth]{../images/objective_case2}
+ \caption{Objective sequence for Case 2.}
+ \label{fig:objective_case2}
+\end{minipage}
+\end{figure}
+
+\begin{figure}[!ht]
+\centering
+\begin{minipage}{.50\textwidth}
+ \centering
+ \includegraphics[width=.8\textwidth]{../images/residual_case3}
+ \caption{Residual sequence for Case 3.}
+ \label{fig:residual_case3}
+\end{minipage}%
+\begin{minipage}{.50\textwidth}
+ \centering
+ \includegraphics[width=.8\textwidth]{../images/objective_case3}
+ \caption{Objective sequence for Case 3.}
+ \label{fig:objective_case3}
+\end{minipage}
+\end{figure}
+
+\begin{figure}[!ht]
+\centering
+\begin{minipage}{.50\textwidth}
+ \centering
+ \includegraphics[width=.8\textwidth]{../images/residual_case4}
+ \caption{Residual sequence for Case 4.}
+ \label{fig:residual_case4}
+\end{minipage}%
+\begin{minipage}{.50\textwidth}
+ \centering
+ \includegraphics[width=.8\textwidth]{../images/objective_case4}
+ \caption{Objective sequence for Case 4.}
+ \label{fig:objective_case4}
+\end{minipage}
+\end{figure}
 
 \end{document}
 
