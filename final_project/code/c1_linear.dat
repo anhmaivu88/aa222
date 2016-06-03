@@ -1,0 +1,8 @@
+m         3
+m_des     2
+basis     0
+case      0
+title     Case_1
+plot      1
+reset_max 8
+res_threshold 1e-4
