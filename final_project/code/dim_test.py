@@ -154,6 +154,7 @@ for i in range(m_des):
 if plotting:
     ### Residual sequences
     length = len(Res_full)
+    label_len = min(length,10)
     longest = 0
     colors  = linspecer(length)
     sty = '-'
@@ -170,7 +171,7 @@ if plotting:
     plt.title("Residual Sequences: "+title_case)
     plt.xlabel("Iteration")
     plt.ylabel("Residual")
-    plt.legend(['Stage '+str(i+1) for i in range(length)])
+    plt.legend(['Stage '+str(i+1) for i in range(label_len)])
     # Set plot location on screen
     manager = plt.get_current_fig_manager()
     x,y,dx,dy = manager.window.geometry().getRect()
@@ -190,7 +191,7 @@ if plotting:
     plt.title("Objective Sequences: "+title_case)
     plt.xlabel("Iteration")
     plt.ylabel("Residual")
-    plt.legend(['Stage '+str(i+1) for i in range(length)])
+    plt.legend(['Stage '+str(i+1) for i in range(label_len)])
     # Set plot location on screen
     manager = plt.get_current_fig_manager()
     x,y,dx,dy = manager.window.geometry().getRect()
