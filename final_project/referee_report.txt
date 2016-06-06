@@ -1,0 +1,39 @@
+Referee Report
+- Summarize the paper in 1-5 sentences
+- Evaluate the goal of the work (validity and significance)
+- Evaluate the quality of the work (methodology, techniques, accuracy, errors)
+
+Questions:
+
+What is the author trying to do?
+- Clearly stated goal
+- Existing issues
+- Author describes contributions (early in paper)
+
+Is the goal of this paper significant?
+- Is the problem real?
+- Is there reason to care about the results?
+- Are the results new?
+
+Is the method of approach valid?
+- Does anything in the approach invalidate the results?
+- Is the method clear, or is it obscured?
+- What are the assumptions, and are they realistic? 
+- Are the results sensitive to assumptions
+
+Is the actual execution of the research correct?
+- Is the math correct?
+- Are the results consistent with observed facts/measurements?
+- If results are stochastic, are confidence intervals given?
+- Did the author do what they claimed?
+
+Are the correct conclusions being drawn from the results?
+- Are any conclusions being drawn?
+- What are the implications of the results?
+
+Is the presentation satisfactory?
+- Is it comprehensible?
+- Too much/too little detail?
+
+What did you learn?
+- If you didn't learn anything, the paper is not publishable
